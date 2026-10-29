@@ -3,11 +3,12 @@
 <h1>Training Studio</h1>
 
 <p><strong>A self-hosted training planner for people who like their data.</strong><br>
-Plan your weeks, sync your Garmin, and ask an AI assistant to analyse your data and adjust the plan.</p>
+Your Garmin syncs in on its own. Plan your weeks, and ask an AI assistant to analyse your data and adjust the plan.</p>
 
 <p>
 <a href="#quick-start">Quick start</a> ·
 <a href="#talk-to-your-training-data">The assistant</a> ·
+<a href="#your-garmin-synced-automatically">Garmin sync</a> ·
 <a href="#laps-that-make-sense-on-the-ice">Skating laps</a> ·
 <a href="docs/self-hosting.md">Self-hosting</a> ·
 <a href="docs/development.md">Development</a>
@@ -59,6 +60,16 @@ Every edit the assistant makes is an ordinary change with a diff and an Undo but
 
 It runs on [Ollama Cloud](https://ollama.com) with one API key for the whole server. What leaves your server: the messages you send, plus the data the assistant reads to answer them. Usage limits per account and per week are set in `.env`. Without a key the rest of the app works as usual.
 
+## Your Garmin, synced automatically
+
+Connect your Garmin account once in Settings → Connections and forget about it. Every couple of hours the app pulls your new activities and the last few days of sleep, HRV, resting heart rate, stress, Body Battery and steps. No exports, no manual uploads.
+
+- **Recordings find their workout.** A run synced on Tuesday links itself to Tuesday's planned run, so the week shows planned and done side by side without you touching anything. Unclear matches wait in the Inbox.
+- **Your history comes along.** Backfill older data from Garmin, or upload a full Garmin data export or loose FIT files.
+- **The original files are kept.** Every raw FIT and JSON file is stored before parsing, so new analyses can be computed from old sessions later.
+- **Your login stays yours.** Your Garmin password (and MFA code) is used once to sign in and never stored. Only the session tokens are kept, encrypted with a key that lives outside the data volume.
+- **You choose the interval**, from every hour to once a day, or turn automatic sync off and sync by hand.
+
 ## Laps that make sense on the ice
 
 Every recording gets a full activity view, computed on the server from the raw GPS and heart rate stream:
@@ -76,7 +87,6 @@ It handles watches that don't record every second, and works the same for runs a
 ## Everything else
 
 - **Week and multi-week planning.** Days as rows, one tap to mark a session done, drag and multi-select across weeks, weekly totals per sport.
-- **Garmin sync.** Activities, sleep, HRV, resting heart rate and more, pulled on a schedule. Recordings link themselves to the workout they belong to. You can also upload a Garmin export or FIT files.
 - **Health overview.** Every metric next to your own baseline, with the sample size shown. Missing data stays missing, it is never counted as zero.
 - **Multi-user, private by default.** Invite-only accounts, each with its own SQLite database. Full export and restore.
 - **Works on your phone.** Planning happens at a laptop, logging happens right after a session. Both are covered.
