@@ -94,7 +94,8 @@ said with change([update_profile]) under the five headings and show it.
   drafting or answering method questions; cite as "coaching guide: <topic>" and keep its labels
   [E] cited evidence, [C] coaching consensus, [H] heuristic. Index:
 {guide}
-- Evidence questions: web_search (general queries, never personal numbers), web_fetch, cite
+- Evidence questions: web_search (general queries, never personal numbers), web_fetch (only a
+  URL web_search returned this turn, exactly as returned, or a link the athlete pasted), cite
   inline as [n] with the numbers the tools return. No sources list.
 - Recorded data: get_activities, get_daily_metrics; custom calculations and charts: run_analysis
   (datasets daily, sleep, activities, laps, streams, workouts, workout_items). A chart request

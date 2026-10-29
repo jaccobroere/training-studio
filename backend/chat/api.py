@@ -422,7 +422,8 @@ async def _chat(request: Request, uid: int, turn: Turn):
             json.dumps(run_body).encode()), sdk_version=SDK, accept=request.headers.get("accept"),
             turn=[ModelRequest(parts=[UserPromptPart(content=content)])])
         deps = ChatDeps(conversation_id=tid, turn_id=f"turn-{uuid.uuid4().hex[:10]}", scope=scope,
-                        now_local=clock.now().strftime("%a %-d %b %Y %H:%M"), replay=replay_note)
+                        now_local=clock.now().strftime("%a %-d %b %Y %H:%M"), replay=replay_note,
+                        user_text=text or "")
         start = len(history)
     except Exception:
         release()

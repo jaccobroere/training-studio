@@ -23,7 +23,7 @@ logged, and the athlete sees one plain sentence (`plain_error`).
 | `prompts/system.md` | The policy, sent as written |
 | `tools.py` | Plan tools (reads, `change`, `propose`, `undo_change`, `read_guide`) and the tool-step metadata |
 | `health_tools.py` | `get_daily_metrics` |
-| `research_tools.py` | `web_search`, `web_fetch` (untrusted fence) |
+| `research_tools.py` | `web_search`, `web_fetch` (untrusted fence; only fetches URLs that `web_search` returned this turn or the athlete pasted in their message, and never a URL carrying personal numbers) |
 | `analysis_tools.py` | `run_analysis` (pyrunner, chart spec v2: `analysis/CHARTS.md`), `pin_analysis`, `list_pinned`, `update_pinned`, `unpin_analysis`; ≤3 sandbox runs per turn |
 | `proposals.py` | Server-stored proposals: dry run, preview, apply / discard / stale / undone |
 | `claims.py` | Strips claims ("I've moved…", "Moved…", "Done —") of a write kind that didn't land: plan / pin / proposal tracked separately (stream and stored history) |

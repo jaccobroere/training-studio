@@ -75,6 +75,10 @@ class ChatDeps:
     replay: str = ""  # status now of this thread's earlier proposals and changes
     # Sources seen this turn, so citation numbers are unique across parallel searches.
     sources: dict[str, int] = field(default_factory=dict)
+    # URLs web_fetch may open this turn: web_search results (added as they arrive) and links
+    # in the athlete's own message (chat/research_tools.py). Normalised, see `fetch_key`.
+    fetchable: set[str] = field(default_factory=set)
+    user_text: str = ""  # the athlete's message this turn (links in it are fetchable)
     analysis_runs: int = 0  # sandbox runs this turn (capped in chat/analysis_tools.py)
     lock: threading.Lock = field(default_factory=threading.Lock)
 
