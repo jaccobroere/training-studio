@@ -1,0 +1,26 @@
+.boot { height: 100%; display: grid; place-items: center; background: var(--chassis); }
+.mark.big { width: 44px; height: 44px; border: 2px solid var(--ink); border-radius: 50%; display: grid; place-items: center; flex: none; }
+.mark.big i { width: 13px; height: 13px; border-radius: 50%; background: var(--signal); }
+.boot .mark.big { animation: pulse 1.2s steps(2) infinite; }
+.auth { height: 100%; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; align-items: center; justify-content: safe center; gap: 14px;
+  padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: var(--chassis); }
+.auth-panel { width: min(400px, 100%); padding: 24px 24px 26px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 1.5px 0 var(--lip); }
+.auth-hd { display: flex; align-items: center; gap: 14px; }
+.auth-hd h1 { font-size: 20px; line-height: 1.15; letter-spacing: -0.005em; }
+.auth-hd p { margin-top: 4px; letter-spacing: 0.04em; }
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
+.auth-form .input { height: 44px; font-size: 16px; padding: 0 12px; }
+.auth-go { height: 48px; margin-top: 4px; font-size: 12px; letter-spacing: 0.08em; }
+.auth-err { color: var(--danger); font-size: 13px; line-height: 1.4; padding: 8px 10px; border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--rule)); border-radius: 3px; }
+.auth-ok { color: var(--ok); font-size: 12.5px; }
+.auth-foot { color: var(--ink-3); text-align: center; max-width: 36ch; line-height: 1.5; text-wrap: balance; }
+@media (max-width: 480px) {
+  /* Sit in the upper third so the on-screen keyboard doesn't cover the form. */
+  .auth { justify-content: flex-start; padding-top: max(10dvh, env(safe-area-inset-top)); }
+  .auth-panel { padding: 20px 18px 22px; }
+}
+/* Privacy note: the auth panel, a little wider for prose. As an overlay it re-reads from Settings. */
+.privacy .auth-panel { width: min(520px, 100%); }
+.privacy-bd { display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.privacy-bd b { color: var(--ink); font-weight: 600; }
+.privacy.overlay { position: fixed; inset: 0; z-index: 60; height: auto; }

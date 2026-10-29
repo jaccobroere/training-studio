@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Console · Training Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=Doto:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="c.css">
+<link rel="stylesheet" href="parts.css">
+<style>
+  body { height: 100vh; overflow: hidden; }
+  .behind { position: absolute; inset: 0; background: var(--chassis); }
+  .behind .peek { height: 36px; background: var(--face); border-bottom: 1px solid var(--rule); }
+  .sheet { position: absolute; inset: 14px 0 0 0; display: flex; flex-direction: column; border-left: 0; border-top: 1px solid var(--rule-2); border-radius: 8px 8px 0 0; box-shadow: 0 -2px 8px oklch(0 0 0 / 0.12); overflow: hidden; }
+  .handle { height: 18px; display: grid; place-items: center; flex: none; }
+  .handle i { width: 36px; height: 4px; border-radius: 2px; background: var(--rule-2); }
+  .con-hd { height: 46px; padding: 0 4px 0 12px; }
+  .con-hd .key.sq { width: 40px; height: 40px; }
+  .con-hd .key.flat:not(.sq) { display: none; }
+  .scope { margin: 8px 12px 0; }
+  .scope .readout > div { padding: 6px 9px 5px; }
+  .scope .readout dd { font-size: 11px; }
+  .scope .readout dd small { display: none; }
+  .thread { padding: 10px 12px 8px; }
+  .msg p { font-size: 14px; }
+  .rc-ft .key { height: 40px; }
+  .rc-op { grid-template-columns: 54px 1fr; font-size: 11px; }
+  .composer { padding: 8px 12px calc(12px + env(safe-area-inset-bottom)); }
+  .cmp-ft .key { height: 40px; }
+  .cmp-hint { display: none; }
+</style>
+</head>
+<body>
+  <div class="behind"><div class="peek"></div></div>
+  <aside class="console sheet" role="dialog" aria-label="Chat console">
+    <div class="handle"><i></i></div>
+    <div id="conhd" style="display:contents"></div>
+    <div class="thread" id="thread"></div>
+    <div id="composer"></div>
+  </aside>
+<script src="../data.js"></script>
+<script src="c.js"></script>
+<script>
+  document.getElementById("conhd").innerHTML = consoleHeader(true);
+  document.getElementById("thread").innerHTML = thread();
+  document.getElementById("composer").outerHTML = composer().replace('<span class="fill"></span>', '<span class="mono" style="font-size:10.5px;color:var(--ink-3)">Demo data</span><span class="fill"></span>');
+  const th = document.getElementById("thread");
+  // show from the proposal down: the part that needs a decision
+  document.fonts.ready.then(() => { th.scrollTop = th.querySelector(".proposal").offsetTop - th.offsetTop - 12; });
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Week · Training Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=Doto:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="c.css">
+<link rel="stylesheet" href="parts.css">
+<style>
+  body { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  .top { background: var(--face); border-bottom: 1px solid var(--rule-2); padding: 8px 12px 8px; flex: none; }
+  .top-r1 { display: flex; align-items: center; gap: 6px; }
+  .top .key { height: 40px; }
+  .top .key.sq { width: 40px; }
+  .wk { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 40px; }
+  .wk b { font: 600 15px/1 var(--sans); }
+  .wk span { font: 500 11px/1 var(--mono); color: var(--ink-2); }
+  .top-r2 { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--ink-2); }
+  .top-r2 .mono { font-size: 11px; }
+  .top-r2 .key { height: 30px; }
+  .scroll { flex: 1; overflow: auto; }
+  .targets { display: flex; overflow-x: auto; scrollbar-width: none; }
+  .targets .ch { flex: 0 0 auto; width: 128px; padding: 8px 10px; }
+  .targets .ch.gym { width: 150px; }
+  .days-m { padding: 10px 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .dm { background: var(--face); border: 1px solid var(--rule-2); border-radius: var(--r); overflow: hidden; }
+  .dm-hd { display: flex; align-items: baseline; gap: 8px; padding: 8px 12px 7px; background: var(--face-sunk); border-bottom: 1px solid var(--rule); }
+  .dm-hd .dow { font: 600 11px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  .dm-hd .dn { font: 500 16px/1 var(--mono); }
+  .dm-hd .n { margin-left: auto; font: 500 10.5px/1 var(--mono); color: var(--ink-3); }
+  .dm.today { border-color: oklch(from var(--signal) calc(l - 0.12) c h); }
+  .dm.today .dm-hd { background: var(--signal); border-bottom-color: oklch(from var(--signal) calc(l - 0.12) c h); }
+  .dm.today .dm-hd * { color: var(--signal-ink); }
+  .dm.today .tdy { font: 700 10px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+  .ms { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 9px 8px 9px 12px; border-top: 1px dashed var(--rule); }
+  .ms:first-of-type { border-top: 0; }
+  .ms .l1 { display: flex; align-items: center; gap: 7px; }
+  .ms .ttl { font: 600 14px/1.2 var(--sans); }
+  .ms .rx { font-size: 12px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ms .l3 { display: flex; align-items: center; gap: 10px; margin-top: 5px; font-size: 11px; }
+  .ms .l3 .mono { color: var(--ink-2); }
+  .ms .sport { min-width: 34px; height: 20px; font-size: 9.5px; }
+  .ms .st { font-size: 11px; }
+  .ms .dk { width: 64px; height: 44px; flex-direction: column; gap: 3px; font-size: 10px; padding: 0; }
+  .ms .dk svg { width: 16px; height: 16px; stroke-width: 2; }
+  .ms .dk.is-latched { color: var(--ink-2); background: transparent; border-color: var(--rule); box-shadow: none; transform: none; }
+  .ms.changed { background: var(--changed); outline: 1px dashed var(--changed-rule); outline-offset: -3px; }
+  .ms.prio-C .ttl { font-weight: 500; color: var(--ink-2); }
+  .ms.prio-C .rx { color: var(--ink-3); }
+  .ms .what { min-width: 0; }
+  .rest-m { padding: 12px; font: 400 12px/1 var(--mono); color: var(--ink-3); display: flex; align-items: center; justify-content: space-between; }
+  .rest-m .key { height: 36px; }
+  .tray { margin: 0 12px 16px; }
+  .tray-hint { display: none; }
+  .tray-items { flex-direction: column; }
+  .chip-sess { min-height: 44px; }
+  .chip-sess .key.sq { margin-left: auto; width: 40px; height: 36px; }
+  .dm-past { display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 44px; width: 100%; text-align: left; }
+  .dm-past .dow { font: 600 11px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  .dm-past .dn { font-size: 15px; }
+  .dm-past .sum { font: 500 10.5px/1 var(--mono); color: var(--ink-2); margin-left: 6px; }
+  .dm-past .n { margin-left: auto; font-size: 10.5px; color: var(--ink-2); }
+  .dm-past svg { width: 14px; height: 14px; stroke: var(--ink-2); fill: none; stroke-width: 1.6; }
+  .days-m { gap: 8px; }
+  .demo { text-align: center; font: 500 10px/1 var(--mono); color: var(--ink-3); padding: 0 0 14px; }
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-r1">
+      <button class="key sq" aria-label="Previous week">${ICON.prev}</button>
+      <button class="wk" aria-haspopup="dialog"><b>Week 3</b><span>11–17 Jan 2027</span></button>
+      <button class="key sq" aria-label="Next week">${ICON.next}</button>
+      <button class="key sq" aria-label="Open console">${ICON.console}</button>
+    </div>
+    <div class="top-r2">
+      <button class="key">Today</button>
+      <span>Early marathon</span><span class="mono">· r42 14:02</span>
+      <span class="fill"></span>
+      <button class="key sq" aria-label="Add session">${ICON.plus}</button>
+    </div>
+  </header>
+  <div class="scroll">
+    <div id="targets"></div>
+    <div class="days-m" id="days"></div>
+    <div id="tray"></div>
+    <div class="demo">Demo data — not real measurements</div>
+  </div>
+  <div id="tabs"></div>
+<script src="../data.js"></script>
+<script src="c.js"></script>
+<script>
+  document.querySelectorAll(".top").forEach((el) => { el.innerHTML = el.innerHTML.replace(/\$\{ICON\.(\w+)\}/g, (_, k) => ICON[k]); });
+  document.getElementById("targets").outerHTML = targets();
+  document.getElementById("tabs").outerHTML = tabbar("week");
+  const ms = (s) => h`<div class="ms prio-${s.prio} ${s.changed ? "changed" : ""}">
+    <div class="what">
+      <div class="l1"><span class="sport">${SPORT[s.sport]}</span><span class="ttl">${esc(s.title)}</span>${s.changed ? '<span class="chg-tag mono">chat · r42</span>' : ""}</div>
+      <div class="rx">${esc(s.rx)}</div>
+      <div class="l3"><span class="prio ${s.prio}">${s.prio}</span>${status(s.status)}<span class="mono">P ${esc(s.planned)}${s.actual ? " · A " + esc(s.actual.split(" · ")[0]) : ""}</span></div>
+    </div>
+    ${s.status === "planned"
+      ? h`<button class="key dk" aria-label="Mark ${esc(s.title)} done">${ICON.check}Done</button>`
+      : h`<button class="key dk is-latched" aria-pressed="true">${ICON.check}Logged</button>`}
+  </div>`;
+  const past = (d) => d.date < D.week.today && d.sessions.length && d.sessions.every((x) => x.status !== "planned");
+  document.getElementById("days").innerHTML = D.week.days.map((d) => past(d) ? h`<button class="dm dm-past" aria-expanded="false"><span class="dow">${d.dow}</span><span class="dn mono">${d.d}</span><span class="sum">${d.sessions.map((x) => SPORT[x.sport]).join(" · ")}</span><span class="n mono">${d.sessions.length}/${d.sessions.length} logged</span>${ICON.down}</button>` : h`<section class="dm ${d.today ? "today" : ""}" ${d.today ? 'aria-current="date"' : ""}>
+    <div class="dm-hd"><span class="dow">${d.dow}</span><span class="dn">${d.d}</span>${d.today ? '<span class="tdy">Today</span>' : ""}<span class="n">${d.sessions.length ? d.sessions.length + " session" + (d.sessions.length > 1 ? "s" : "") : ""}</span></div>
+    ${d.sessions.length ? d.sessions.map(ms).join("") : h`<div class="rest-m"><span>${d.restLabel || "No sessions"}</span><button class="key flat">${ICON.plus}Add</button></div>`}
+  </section>`).join("");
+  document.getElementById("tray").innerHTML = h`<div class="tray"><div class="tray-hd"><span class="silk">Unscheduled</span><span class="mono tray-n">${D.week.unscheduled.length}</span></div><div class="tray-items">${D.week.unscheduled.map((s) => h`<div class="chip-sess"><span class="sport">${SPORT[s.sport]}</span><span class="t">${esc(s.title)}</span><span class="rx mono">${esc(s.rx)}</span><span class="prio C">C</span><button class="key sq flat" aria-label="Move to…">${ICON.more}</button></div>`)}</div></div>`;
+</script>
+</body>
+</html>

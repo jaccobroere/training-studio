@@ -1,0 +1,165 @@
+/* Direction C — Instrument Panel. Shared tokens + components. */
+:root {
+  color-scheme: light;
+  /* chassis & faces: cool grey, chroma toward 250 */
+  --chassis: oklch(0.845 0.005 250);
+  --face: oklch(0.915 0.004 250);
+  --face-2: oklch(0.95 0.003 250);      /* raised key face */
+  --face-sunk: oklch(0.885 0.005 250);  /* recessed wells */
+  --rule: oklch(0.8 0.006 250);
+  --rule-2: oklch(0.66 0.007 250);
+  --ink: oklch(0.2 0.008 250);
+  --ink-2: oklch(0.4 0.008 250);
+  --ink-3: oklch(0.48 0.008 250);
+  --lip: oklch(0.62 0.008 250);         /* key bottom lip */
+  /* display screens — light theme: a light inset display (paper-white LCD), dark traces */
+  --screen: oklch(0.985 0.002 250);
+  --screen-2: oklch(0.955 0.004 250);   /* readout strip */
+  --grat: oklch(0.83 0.006 250);
+  --grat-2: oklch(0.93 0.005 250);      /* no-data fill */
+  --s-ink: oklch(0.22 0.01 250);
+  --s-ink-2: oklch(0.42 0.01 250);
+  --s-ink-3: oklch(0.5 0.01 250);
+  --s-band: oklch(0.3 0.02 250 / 0.09);
+  /* the one signal */
+  --signal: oklch(0.67 0.2 42);
+  --signal-ink: oklch(0.17 0.03 42);
+  --changed: oklch(0.885 0.018 250);
+  --changed-rule: oklch(0.55 0.05 250);
+
+  --sans: "Instrument Sans", system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, monospace;
+  --dot: "Doto", var(--mono);
+  --r: 4px;
+  --r-key: 3px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --chassis: oklch(0.165 0.005 250);
+    --face: oklch(0.215 0.006 250);
+    --face-2: oklch(0.265 0.007 250);
+    --face-sunk: oklch(0.19 0.006 250);
+    --rule: oklch(0.3 0.008 250);
+    --rule-2: oklch(0.42 0.008 250);
+    --ink: oklch(0.94 0.004 250);
+    --ink-2: oklch(0.78 0.006 250);
+    --ink-3: oklch(0.68 0.008 250);
+    --lip: oklch(0.12 0.005 250);
+    --screen: oklch(0.13 0.008 250);
+    --screen-2: oklch(0.16 0.008 250);
+    --grat: oklch(0.27 0.01 250);
+    --grat-2: oklch(0.21 0.01 250);
+    --s-ink: oklch(0.94 0.004 250);
+    --s-ink-2: oklch(0.76 0.008 250);
+    --s-ink-3: oklch(0.62 0.01 250);
+    --s-band: oklch(0.94 0.004 250 / 0.12);
+    --signal: oklch(0.71 0.19 45);
+    --changed: oklch(0.26 0.02 250);
+    --changed-rule: oklch(0.6 0.05 250);
+  }
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--chassis); color: var(--ink); }
+body {
+  font: 400 13px/1.4 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum";
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+.mono { font-family: var(--mono); font-feature-settings: "tnum", "zero"; }
+
+/* Silk-screen label: the panel's own labelling system (controls & columns only) */
+.silk {
+  font: 600 10px/1 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* ---------- Keys (physical switches) ---------- */
+.key {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 30px; padding: 0 11px;
+  background: var(--face-2);
+  border: 1px solid var(--rule-2);
+  border-radius: var(--r-key);
+  box-shadow: 0 1.5px 0 var(--lip);
+  font: 600 11px/1 var(--sans); letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+  transition: transform 120ms cubic-bezier(.22,1,.36,1), box-shadow 120ms, background 120ms;
+}
+.key:hover { background: oklch(from var(--face-2) calc(l + 0.02) c h); }
+.key:active, .key.is-down { transform: translateY(1.5px); box-shadow: 0 0 0 var(--lip); }
+.key:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.key.sq { width: 30px; padding: 0; }
+.key.ink { background: var(--ink); color: var(--face-2); border-color: var(--ink); }
+.key.ink:hover { background: oklch(from var(--ink) calc(l + 0.06) c h); }
+.key.signal { background: var(--signal); color: var(--signal-ink); border-color: oklch(from var(--signal) calc(l - 0.12) c h); box-shadow: 0 1.5px 0 oklch(from var(--signal) calc(l - 0.25) c h); }
+.key.flat { box-shadow: none; background: transparent; border-color: transparent; }
+.key.flat:hover { background: var(--face-sunk); }
+.key .led { width: 6px; height: 6px; border-radius: 1px; background: var(--rule-2); }
+.key.is-latched { background: var(--face-sunk); transform: translateY(1.5px); box-shadow: inset 0 1px 0 var(--rule-2); }
+.key.is-latched .led { background: var(--ink); }
+.key svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+/* segmented key group — keys share one bezel */
+.seg { display: inline-flex; border: 1px solid var(--rule-2); border-radius: var(--r-key); box-shadow: 0 1.5px 0 var(--lip); background: var(--face-2); }
+.seg > .key { border: 0; border-radius: 0; box-shadow: none; }
+.seg > .key + .key { border-left: 1px solid var(--rule-2); }
+.seg > .key.is-latched { box-shadow: inset 0 2px 0 var(--rule); transform: none; }
+.seg > .key.is-on { background: var(--ink); color: var(--face-2); transform: none; }
+
+/* ---------- App shell ---------- */
+.shell { display: grid; grid-template-columns: 68px 1fr; height: 100vh; }
+.rail {
+  background: var(--face); border-right: 1px solid var(--rule);
+  display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px;
+}
+.rail .mark { width: 36px; height: 36px; border: 1.5px solid var(--ink); border-radius: 50%; display: grid; place-items: center; margin-bottom: 14px; }
+.rail .mark i { width: 10px; height: 10px; border-radius: 50%; background: var(--ink); }
+.rail a {
+  width: 56px; padding: 8px 0 7px; border-radius: var(--r); display: flex; flex-direction: column; align-items: center; gap: 5px;
+  color: var(--ink-2); text-decoration: none; font: 600 9.5px/1 var(--sans); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.rail a svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+.rail a:hover { background: var(--face-sunk); color: var(--ink); }
+.rail a[aria-current] { background: var(--ink); color: var(--face-2); }
+.rail .spacer { flex: 1; }
+.demo-tag { font: 500 9px/1.2 var(--mono); color: var(--ink-3); text-align: center; letter-spacing: 0.02em; }
+
+/* ---------- Panel modules ---------- */
+.module { background: var(--face); border: 1px solid var(--rule); border-radius: var(--r); }
+.module-hd { display: flex; align-items: center; gap: 10px; padding: 0 12px; height: 38px; border-bottom: 1px solid var(--rule); }
+
+/* ---------- Status / priority / sport ---------- */
+.sport {
+  display: inline-grid; place-items: center; min-width: 40px; height: 22px; padding: 0 5px;
+  border: 1px solid var(--rule-2); border-radius: 2px; background: var(--face-2);
+  font: 600 10px/1 var(--mono); letter-spacing: 0.04em; color: var(--ink);
+}
+.prio { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 2px; font: 700 10.5px/1 var(--mono); }
+.prio.A { background: var(--ink); color: var(--face-2); }
+.prio.B { border: 1px solid var(--ink-2); color: var(--ink); }
+.prio.C { color: var(--ink-3); border: 1px dashed var(--rule-2); font-weight: 500; }
+.st { display: inline-flex; align-items: center; gap: 6px; font: 500 11.5px/1 var(--sans); color: var(--ink-2); }
+.st .g { font: 500 12px/1 var(--mono); width: 12px; text-align: center; color: var(--ink); }
+.st.done { color: var(--ink); }
+
+/* ---------- Screens (display surfaces) ---------- */
+.screen { background: var(--screen); border: 1px solid var(--rule-2); border-radius: 3px; box-shadow: inset 0 1px 2px oklch(0.2 0.01 250 / 0.14); color: var(--s-ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .screen { border-color: oklch(0.1 0.005 250); box-shadow: inset 0 1px 3px oklch(0 0 0 / 0.45); } }
+.readout { display: flex; gap: 0; background: var(--screen-2); border-bottom: 1px solid var(--grat); }
+.readout > div { padding: 7px 12px 6px; border-right: 1px solid var(--grat-2); min-width: 0; }
+.readout > div:last-child { border-right: 0; }
+.readout dt { font: 600 9px/1 var(--sans); letter-spacing: 0.09em; text-transform: uppercase; color: var(--s-ink-3); margin-bottom: 4px; }
+.readout dd { font: 500 12.5px/1.1 var(--mono); color: var(--s-ink); white-space: nowrap; }
+.readout dd small { color: var(--s-ink-2); font-size: 10.5px; margin-left: 2px; }
+.readout .sig dt { color: var(--signal); }
+
+svg text { font-family: var(--mono); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

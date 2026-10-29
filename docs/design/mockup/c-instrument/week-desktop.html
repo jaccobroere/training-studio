@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week · Training Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=Doto:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="c.css">
+<link rel="stylesheet" href="parts.css">
+<style>
+  .app { display: grid; grid-template-columns: 1fr 440px; min-width: 0; height: 100vh; }
+  .main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+  .board { flex: 1; overflow: auto; }
+  .strip { gap: 7px; padding: 0 12px; }
+  .grid-hd { padding-right: 9px; padding-left: 1px; }
+  .season { display: flex; align-items: center; gap: 10px; }
+  .season .dotm { font: 700 19px/0.7 var(--dot); letter-spacing: 0.02em; color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="rail"></div>
+  <div class="app">
+    <main class="main">
+      <div class="strip" role="toolbar" aria-label="Week controls">
+        <div class="grp">
+          <div class="seg">
+            <button class="key sq" aria-label="Previous week">${ICON.prev}</button>
+            <button class="key wk-label" aria-haspopup="dialog"><span>Week 3</span><span class="mono">11–17 Jan 2027</span></button>
+            <button class="key sq" aria-label="Next week">${ICON.next}</button>
+          </div>
+          <button class="key">Today</button>
+        </div>
+        <span class="div"></span>
+        <div class="field"><span class="silk">Phase</span><span class="v">Early marathon ${ICON.down}</span></div>
+        <span class="div"></span>
+        <div class="field season"><span class="silk">Rotterdam</span><div class="v"><span class="dotm">13</span>&nbsp;wk to go</div></div>
+        <span class="fill"></span>
+        <button class="key flat" aria-label="Revision history">${ICON.hist}<span class="mono" style="text-transform:none;letter-spacing:0;font-weight:500">r42 · 14:02</span></button>
+        <button class="key">${ICON.plus}Add session</button>
+        <button class="key is-latched" aria-pressed="true"><span class="led"></span>Console</button>
+      </div>
+      <div id="targets"></div>
+      <div class="board" id="board"></div>
+    </main>
+    <aside class="console" aria-label="Chat console">
+      <div id="conhd" style="display:contents"></div>
+      <div class="thread" id="thread"></div>
+      <div id="composer"></div>
+    </aside>
+  </div>
+</div>
+<script src="../data.js"></script>
+<script src="c.js"></script>
+<script>
+  document.getElementById("rail").outerHTML = rail("week");
+  // toolbar icon placeholders
+  document.querySelectorAll(".strip").forEach((el) => { el.innerHTML = el.innerHTML.replace(/\$\{ICON\.(\w+)\}/g, (_, k) => ICON[k]); });
+  document.getElementById("targets").outerHTML = targets();
+  document.getElementById("board").innerHTML = weekGrid(false);
+  document.getElementById("conhd").innerHTML = consoleHeader(false);
+  document.getElementById("thread").innerHTML = thread();
+  document.getElementById("composer").outerHTML = composer();
+  const th = document.getElementById("thread"); const sb = () => (th.scrollTop = th.scrollHeight); sb(); document.fonts.ready.then(sb);
+</script>
+</body>
+</html>

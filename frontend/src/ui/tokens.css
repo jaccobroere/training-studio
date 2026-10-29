@@ -1,0 +1,227 @@
+/* Instrument Panel — tokens + primitives. Source of truth: docs/DESIGN.md.
+   Light theme = light chassis + light screens; dark theme = dark chassis + dark screens. */
+:root {
+  color-scheme: light;
+  --chassis: oklch(0.845 0.005 250);
+  --face: oklch(0.915 0.004 250);
+  --face-2: oklch(0.95 0.003 250);
+  --face-sunk: oklch(0.885 0.005 250);
+  --rule: oklch(0.8 0.006 250);
+  --rule-2: oklch(0.66 0.007 250);
+  --ink: oklch(0.2 0.008 250);
+  --ink-2: oklch(0.4 0.008 250);
+  --ink-3: oklch(0.44 0.008 250);
+  --lip: oklch(0.62 0.008 250);
+  --screen: oklch(0.985 0.002 250);
+  --screen-2: oklch(0.955 0.004 250);
+  --grat: oklch(0.83 0.006 250);
+  --grat-2: oklch(0.93 0.005 250);
+  --s-ink: oklch(0.22 0.01 250);
+  --s-ink-2: oklch(0.42 0.01 250);
+  --s-ink-3: oklch(0.5 0.01 250);
+  --s-band: oklch(0.3 0.02 250 / 0.09);
+  --screen-shadow: inset 0 1px 2px oklch(0.2 0.01 250 / 0.14);
+  --signal: oklch(0.67 0.2 42);
+  --signal-ink: oklch(0.17 0.03 42);
+  --signal-edge: oklch(0.55 0.2 42);
+  --changed: oklch(0.885 0.018 250);
+  --changed-rule: oklch(0.55 0.05 250);
+  --danger: oklch(0.48 0.17 25);
+  --ok: oklch(0.42 0.09 160);
+
+  --sans: "Instrument Sans Variable", "Instrument Sans", system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
+  --dot: "Doto", var(--mono);
+  --r: 4px;
+  --r-key: 3px;
+
+  --z-sticky: 10;
+  --z-dropdown: 20;
+  --z-sheet: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --chassis: oklch(0.165 0.005 250);
+    --face: oklch(0.215 0.006 250);
+    --face-2: oklch(0.265 0.007 250);
+    --face-sunk: oklch(0.19 0.006 250);
+    --rule: oklch(0.3 0.008 250);
+    --rule-2: oklch(0.42 0.008 250);
+    --ink: oklch(0.94 0.004 250);
+    --ink-2: oklch(0.78 0.006 250);
+    --ink-3: oklch(0.68 0.008 250);
+    --lip: oklch(0.12 0.005 250);
+    --screen: oklch(0.13 0.008 250);
+    --screen-2: oklch(0.16 0.008 250);
+    --grat: oklch(0.27 0.01 250);
+    --grat-2: oklch(0.21 0.01 250);
+    --s-ink: oklch(0.94 0.004 250);
+    --s-ink-2: oklch(0.76 0.008 250);
+    --s-ink-3: oklch(0.62 0.01 250);
+    --s-band: oklch(0.94 0.004 250 / 0.12);
+    --screen-shadow: inset 0 1px 3px oklch(0 0 0 / 0.45);
+    --signal: oklch(0.71 0.19 45);
+    --signal-edge: oklch(0.6 0.19 45);
+    --changed: oklch(0.26 0.02 250);
+    --changed-rule: oklch(0.6 0.05 250);
+    --danger: oklch(0.72 0.15 25);
+    --ok: oklch(0.75 0.1 160);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --chassis: oklch(0.165 0.005 250); --face: oklch(0.215 0.006 250); --face-2: oklch(0.265 0.007 250);
+  --face-sunk: oklch(0.19 0.006 250); --rule: oklch(0.3 0.008 250); --rule-2: oklch(0.42 0.008 250);
+  --ink: oklch(0.94 0.004 250); --ink-2: oklch(0.78 0.006 250); --ink-3: oklch(0.68 0.008 250);
+  --lip: oklch(0.12 0.005 250); --screen: oklch(0.13 0.008 250); --screen-2: oklch(0.16 0.008 250);
+  --grat: oklch(0.27 0.01 250); --grat-2: oklch(0.21 0.01 250); --s-ink: oklch(0.94 0.004 250);
+  --s-ink-2: oklch(0.76 0.008 250); --s-ink-3: oklch(0.62 0.01 250); --s-band: oklch(0.94 0.004 250 / 0.12);
+  --screen-shadow: inset 0 1px 3px oklch(0 0 0 / 0.45); --signal: oklch(0.71 0.19 45);
+  --signal-edge: oklch(0.6 0.19 45); --changed: oklch(0.26 0.02 250); --changed-rule: oklch(0.6 0.05 250);
+  --danger: oklch(0.72 0.15 25); --ok: oklch(0.75 0.1 160);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+/* The app is a fixed shell with inner scrollers: the document itself never scrolls or bounces,
+   so nothing (an escaped absolute element, iOS keyboard panning) can drag the shell around. */
+html, body { overflow: hidden; overscroll-behavior: none; }
+html, body { background: var(--chassis); color: var(--ink); }
+body {
+  font: 400 13px/1.4 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum";
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+button { background: none; border: 0; cursor: pointer; }
+/* Controls are pressed, never selected: no text selection, callout or double-tap zoom on rapid taps. */
+button, [role="button"], summary, .key, label.radio-key {
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+a { color: inherit; }
+h1, h2, h3 { text-wrap: balance; font-weight: 600; }
+.mono { font-family: var(--mono); font-feature-settings: "tnum", "zero"; }
+.fill { flex: 1; }
+.sr, .sr-only { position: absolute; top: 0; left: 0; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.silk {
+  font: 600 10px/1 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* ---------- Keys ---------- */
+.key {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 30px; padding: 0 11px;
+  background: var(--face-2);
+  border: 1px solid var(--rule-2);
+  border-radius: var(--r-key);
+  box-shadow: 0 1.5px 0 var(--lip);
+  font: 600 11px/1 var(--sans); letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+  transition: transform 120ms var(--ease), box-shadow 120ms, background 120ms;
+  text-decoration: none;
+}
+@media (hover: hover) { .key:hover { background: oklch(from var(--face-2) calc(l + 0.02) c h); } }
+.key:active, .key.is-down { transform: translateY(1.5px); box-shadow: 0 0 0 var(--lip); }
+.key:disabled, .key[aria-disabled="true"] { opacity: 0.5; cursor: default; transform: none; box-shadow: 0 1.5px 0 var(--lip); }
+.key.sq { width: 30px; padding: 0; }
+.key.ink { background: var(--ink); color: var(--face-2); border-color: var(--ink); }
+.key.ink:hover { background: oklch(from var(--ink) calc(l + 0.06) c h); }
+.key.flat { box-shadow: none; background: transparent; border-color: transparent; }
+.key.flat:hover { background: var(--face-sunk); }
+.key.flat:active { transform: none; }
+.key.plain { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px; }
+.key .led { width: 6px; height: 6px; border-radius: 1px; background: var(--rule-2); }
+.key.is-latched { background: var(--face-sunk); transform: translateY(1.5px); box-shadow: inset 0 1px 0 var(--rule-2); }
+.key.is-latched .led { background: var(--ink); }
+.key svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; flex: none; }
+.key.danger { color: var(--danger); }
+.key.busy { cursor: progress; opacity: 0.75; }
+
+/* The segment owns the rounded outline; the keys are clipped inside it, so a lit key (ink
+   background, or a key hovered against the face) can never square off a corner. */
+.seg { display: inline-flex; border: 1px solid var(--rule-2); border-radius: var(--r-key); box-shadow: 0 1.5px 0 var(--lip); background: var(--face-2); overflow: hidden; }
+.seg > .key { border: 0; border-radius: 0; box-shadow: none; }
+.seg > .key + .key { border-left: 1px solid var(--rule-2); }
+.seg > .key:active { transform: none; }
+.seg > .key.is-on { background: var(--ink); color: var(--face-2); }
+/* Clipped at the segment's edge, so the ring is drawn inside the key instead of outside it. */
+.seg > .key:focus-visible { outline-offset: -2px; }
+/* The lit key's background is --ink, so the global ink ring would be invisible on it. */
+.seg > .key.is-on:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--face-2); }
+
+/* ---------- Badges ---------- */
+.sport {
+  display: inline-grid; place-items: center; min-width: 40px; height: 22px; padding: 0 5px;
+  border: 1px solid var(--rule-2); border-radius: 2px; background: var(--face-2);
+  font: 600 10px/1 var(--mono); letter-spacing: 0.04em; color: var(--ink);
+}
+.prio { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 2px; font: 700 10.5px/1 var(--mono); flex: none; }
+.prio.A { background: var(--ink); color: var(--face-2); }
+.prio.B { border: 1px solid var(--ink-2); color: var(--ink); }
+.prio.C { color: var(--ink-3); border: 1px dashed var(--rule-2); font-weight: 500; }
+.st { display: inline-flex; align-items: center; gap: 6px; font: 500 11.5px/1 var(--sans); color: var(--ink-2); white-space: nowrap; }
+.st .g { font: 500 12px/1 var(--mono); width: 12px; text-align: center; color: var(--ink); }
+.st.done, .st.partial { color: var(--ink); }
+.st.unlogged { color: var(--ink-3); }
+.tag { font: 500 9.5px/1 var(--mono); padding: 3px 5px; border-radius: 2px; background: var(--face-2); border: 1px solid var(--rule-2); color: var(--ink-2); letter-spacing: 0.02em; white-space: nowrap; }
+
+/* ---------- Modules + screens ---------- */
+.module { background: var(--face); border: 1px solid var(--rule); border-radius: var(--r); }
+.module-hd { display: flex; align-items: center; gap: 10px; padding: 0 12px; min-height: 42px; border-bottom: 1px solid var(--rule); }
+.module-hd h2 { font-size: 14px; }
+.module-bd { padding: 12px; }
+.screen { background: var(--screen); border: 1px solid var(--rule-2); border-radius: 3px; box-shadow: var(--screen-shadow); color: var(--s-ink); }
+.readout { display: flex; flex-wrap: wrap; background: var(--screen-2); border-bottom: 1px solid var(--grat); }
+.readout > div { padding: 7px 12px 6px; border-right: 1px solid var(--grat-2); min-width: 0; }
+.readout > div:last-child { border-right: 0; }
+/* A readout that is itself a card (not a band inside a .screen) is a surface like any other:
+   the same rule token as a screen, all four edges, a 3px radius — and it clips its rows, whose
+   -1px bottom border exists to collapse wrapped-row hairlines and would otherwise overpaint the
+   card's own edge and square off its bottom corners. */
+.readout.card {
+  border: 1px solid var(--rule-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+/* A readout that fills a screen's padding box paints its square background over the screen's
+   rounded corners; give it the matching inner curve. */
+.screen > .readout:first-child { border-radius: 2px 2px 0 0; }
+.screen > .readout:last-child { border-radius: 0 0 2px 2px; }
+.screen > .readout:only-child { border-radius: 2px; }
+.readout dt { font: 600 9px/1 var(--sans); letter-spacing: 0.09em; text-transform: uppercase; color: var(--s-ink-3); margin-bottom: 4px; }
+.readout dd { font: 500 12.5px/1.1 var(--mono); color: var(--s-ink); white-space: nowrap; }
+.readout dd small { color: var(--s-ink-2); font-size: 10.5px; margin-left: 2px; }
+/* A note is not a unit: it sits under the value, on a line of its own. */
+.readout dd small.note { display: block; margin: 3px 0 0; }
+.readout .sig dt { color: var(--signal-edge); }
+
+/* ---------- Form controls ---------- */
+.field-l { display: flex; flex-direction: column; gap: 5px; }
+.input, .textarea, .select {
+  background: var(--face-2); border: 1px solid var(--rule-2); border-radius: 3px;
+  box-shadow: inset 0 1px 0 var(--rule); padding: 7px 9px; font-size: 13px; color: var(--ink); min-width: 0;
+}
+.input:focus-visible, .textarea:focus-visible, .select:focus-visible { outline: 2px solid var(--ink); outline-offset: 0; }
+.textarea { resize: vertical; line-height: 1.5; }
+.input.mono, .textarea.mono { font-family: var(--mono); font-size: 12.5px; }
+::placeholder { color: var(--ink-3); opacity: 1; }
+
+/* ---------- Skeleton ---------- */
+.skel { background: linear-gradient(90deg, var(--face-sunk), var(--face), var(--face-sunk)); background-size: 200% 100%; animation: skel 1.4s linear infinite; border-radius: 3px; }
+@keyframes skel { to { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

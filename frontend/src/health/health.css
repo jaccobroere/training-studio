@@ -1,0 +1,186 @@
+/* Health: a fixed overview in one column, a section navigator beside it (desktop) or a compact
+ * jump menu (narrow). Nothing scrolls sideways. */
+.health-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 200px minmax(0, 1fr); }
+.sec-nav { border-right: 1px solid var(--rule); background: var(--face); padding: 12px 8px; overflow: auto; display: flex; flex-direction: column; gap: 1px; }
+.sec-nav a { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 10px; border-radius: 3px; text-decoration: none; color: var(--ink-2); font-size: 12.5px; }
+.sec-nav a:hover { background: var(--face-sunk); color: var(--ink); }
+.sec-nav a.on { background: var(--ink); color: var(--face-2); }
+.sec-nav a:last-child { margin-top: 10px; position: relative; }
+.sec-nav a:last-child::before { content: ""; position: absolute; left: 10px; right: 10px; top: -6px; border-top: 1px solid var(--rule); }
+.h-jump { display: none; }
+.h-jump .select, .h-type .select { height: 30px; padding: 0 8px; font-size: 12.5px; }
+.health-scroll { overflow: auto; min-height: 0; scroll-padding-top: 8px; }
+.health-col { max-width: 1040px; margin: 0 auto; padding: 14px 20px 48px; display: flex; flex-direction: column; gap: 28px; }
+.h-sec { display: flex; flex-direction: column; gap: 8px; min-width: 0; scroll-margin-top: 8px; }
+.h-sec:focus { outline: none; }
+.h-sec:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.h-sec-hd { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; min-height: 30px; }
+.h-sec-hd h2 { font: 600 15px/1.2 var(--sans); }
+.h-sec-hd .key { align-self: center; }
+.h-meta { font-size: 11px; color: var(--ink-3); }
+.h-note { font-size: 12px; line-height: 1.5; color: var(--ink-2); max-width: 72ch; text-wrap: pretty; }
+.h-sub { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.h-sub h3 { font: 600 12.5px/1.2 var(--sans); color: var(--ink); }
+.h-sub .seg .key { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.chart-screen { overflow: hidden; min-width: 0; }
+.chart-screen .readout { border-radius: 3px 3px 0 0; }
+.readout.compact > div { padding: 6px 10px 5px; }
+.readout.compact dd { font-size: 12px; }
+/* A chart readout on a phone: an even three-column grid, and a short last row stretches rather than
+ * leaving one lone cell. Global (not in the lazy Activities chunk) so Health gets it too. */
+@container (max-width: 640px) {
+  .chart-screen .readout:not(.ov-week) { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .chart-screen .readout:not(.ov-week) > div { grid-column: span 2; border-bottom: 1px solid var(--grat-2); margin-bottom: -1px; padding: 8px 14px; }
+  .chart-screen .readout:not(.ov-week) > div:last-child:nth-child(3n + 1) { grid-column: span 6; }
+  .chart-screen .readout:not(.ov-week) > div:last-child:nth-child(3n + 2), .chart-screen .readout:not(.ov-week) > div:nth-last-child(2):nth-child(3n + 1) { grid-column: span 3; }
+  .chart-screen .readout:not(.ov-week) > div:first-child:nth-last-child(4), .chart-screen .readout:not(.ov-week) > div:first-child:nth-last-child(4) ~ div { grid-column: span 3; }
+  .chart-screen .readout:not(.ov-week) dd { white-space: normal; }
+  /* A unit stays behind its value on a phone too; only a note takes a line of its own. */
+  .chart-screen .readout:not(.ov-week) dd small.note { display: block; margin: 3px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+.chart-note { font-size: 11px; line-height: 1.5; color: var(--s-ink-2); padding: 6px 12px 9px; border-top: 1px solid var(--grat-2); text-wrap: pretty; }
+.chart-note .lg { display: inline-block; width: 12px; height: 8px; margin: 0 3px 0 6px; vertical-align: 0; }
+.chart-note .lg.solid { background: var(--s-ink-2); }
+.chart-note .lg.dashed { border: 1px dashed var(--s-ink); }
+.legend { display: flex; gap: 12px; padding: 7px 12px 0; flex-wrap: wrap; }
+.lg-i { display: inline-flex; gap: 5px; align-items: center; font: 500 10.5px var(--mono); color: var(--s-ink-2); }
+.lg-i svg { border: 1px solid var(--grat); }
+.unavail { padding: 10px 12px 11px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; color: var(--s-ink); }
+.unavail p { font-size: 12px; line-height: 1.5; color: var(--s-ink-2); max-width: 60ch; text-wrap: pretty; }
+.unavail .silk { color: var(--s-ink-3); }
+.spark { display: block; }
+.rd-hd { display: flex; align-items: baseline; gap: 10px; padding: 9px 12px 8px; flex-wrap: wrap; border-bottom: 1px solid var(--grat-2); }
+.laps { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 8px 12px 10px; border-top: 1px solid var(--grat-2); }
+.laps .silk { margin-right: 4px; color: var(--s-ink-3); }
+.lap { height: 30px; flex-direction: column; gap: 1px; padding: 0 7px; font-size: 10px; }
+.lap.is-on { background: var(--signal); color: var(--signal-ink); border-color: var(--signal-edge); }
+.field.thru .v { font-size: 12px; }
+
+/* Overview */
+.ov-week { flex-wrap: wrap; }
+.ov-week > div { flex: 0 1 auto; }
+.ov-hero dd { display: flex; align-items: baseline; gap: 2px; }
+.dot-num { font: 700 26px/1 var(--dot); letter-spacing: 0.02em; color: var(--s-ink); }
+.ov-types dd { display: flex; flex-wrap: wrap; gap: 4px 10px; white-space: normal; }
+.ov-type { display: inline-flex; align-items: center; gap: 4px; }
+.ov-rows { list-style: none; }
+.ov-row { display: grid; grid-template-columns: minmax(140px, 1.3fr) minmax(96px, 0.8fr) minmax(150px, 1.4fr) 124px 74px; align-items: center; gap: 12px;
+  padding: 8px 12px; border-bottom: 1px solid var(--grat-2); color: var(--s-ink); }
+.ov-l { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.ov-name { font-size: 12.5px; font-weight: 500; overflow-wrap: anywhere; }
+.ov-v { display: flex; align-items: baseline; gap: 3px; font-size: 13px; }
+.ov-v b { font-weight: 600; font-size: 15px; }
+.ov-v small { color: var(--s-ink-2); font-size: 10.5px; }
+.ov-day { color: var(--s-ink-3); font-size: 10.5px; margin-left: 6px; }
+.ov-vs { font-size: 11px; color: var(--s-ink-2); }
+.ov-n { font-size: 10.5px; color: var(--s-ink-3); text-align: right; }
+
+
+/* Pinned */
+.pin-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.pin-card { min-width: 0; transition: box-shadow 120ms; }
+.pin-card.dragging { box-shadow: 0 8px 20px -10px oklch(0.2 0.01 250 / 0.45); opacity: 0.96; }
+.pin-card.drop-over { outline: 1.5px dashed var(--rule-2); outline-offset: 3px; }
+.pin-hd { gap: 4px; padding: 0 6px 0 4px; }
+.pin-t { font: 600 13.5px/1.3 var(--sans); min-width: 0; overflow-wrap: anywhere; padding: 8px 0; }
+.pin-grip { cursor: grab; touch-action: none; color: var(--ink-3); }
+.pin-grip:active { cursor: grabbing; }
+.pin-meta { display: flex; flex-wrap: wrap; gap: 2px 12px; padding: 6px 12px 0; font-size: 10.5px; color: var(--ink-3); }
+.pin-body { padding: 8px 0 4px; min-width: 0; }
+.pin-body .an-chart, .pin-body .an-out, .pin-body .an-tbl, .pin-body .an-fold, .pin-body .an-warn { margin-left: 12px; margin-right: 12px; }
+.pin-skel { margin: 0 12px 8px; display: flex; flex-direction: column; gap: 6px; }
+.pin-skel .mono { font-size: 10.5px; color: var(--ink-3); }
+.pin-err { margin: 0 12px 10px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; font-size: 12.5px; }
+.pin-err .an-out { margin: 0; align-self: stretch; }
+.h-empty { border: 1px dashed var(--rule-2); border-radius: 4px; padding: 14px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.h-empty p { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); max-width: 66ch; }
+
+@container page (max-width: 1000px) {
+  .ov-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "l v" "vs n" "sp sp"; row-gap: 3px; }
+  .ov-l { grid-area: l; } .ov-v { grid-area: v; justify-content: flex-end; } .ov-vs { grid-area: vs; } .ov-n { grid-area: n; }
+  .ov-spark { grid-area: sp; display: none; }
+}
+@container page (max-width: 760px) {
+  /* Section navigator becomes a tab row under the toolbar (scrolls sideways on its own, the page does not). */
+  .health-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .sec-nav { position: relative; flex-direction: row; gap: 0; padding: 0 4px; border-right: 0; border-bottom: 1px solid var(--rule);
+    overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+  .sec-nav::-webkit-scrollbar { display: none; }
+  .sec-nav a { flex: none; min-height: 44px; padding: 0 12px; border-radius: 0; font-size: 13px; white-space: nowrap; position: relative; }
+  .sec-nav a:hover { background: transparent; }
+  .sec-nav a.on { background: transparent; color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--ink); }
+  .sec-nav a:last-child { margin-top: 0; }
+  .sec-nav a:last-child::before { display: none; }
+  .h-jump { display: none; }
+  .health-scroll { scroll-padding-top: 4px; }
+  .health-col { padding: 16px 12px calc(96px + env(safe-area-inset-bottom)); gap: 24px; } /* clears the tab bar */
+  .h-sec-hd .key { height: 44px; }
+  .h-sub .select, .h-type .select { height: 44px; }
+  .h-sub .seg .key { height: 44px; min-width: 44px; }
+  .h-empty .key { height: 44px; }
+  .page.health > .strip .seg .key { height: 44px; min-width: 52px; }
+  .dot-num { font-size: 22px; }
+  .ov-week { display: grid; grid-template-columns: 1fr 1fr; }
+  .ov-week > div { border-right: 0; }
+  .ov-week > .ov-hero { border-right: 1px solid var(--grat-2); }
+  .ov-week > .ov-types { grid-column: 1 / -1; border-top: 1px solid var(--grat-2); }
+  .ov-row { padding: 10px 12px; }
+  .ov-n { text-align: right; }
+  .strip .field.thru { display: none; }
+
+}
+
+/* The overview's week label ("Training · week of 19 Oct") needs ~144px of text; three cells only
+ * give it that from ~530px up. Below that, the hours take the first row and the mean and the
+ * types split the second, so nothing wraps to three lines and "0 h / week" stays one line. */
+@container page (max-width: 540px) {
+  .page.health .chart-screen .readout.ov-week { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .page.health .chart-screen .readout.ov-week > div { grid-column: auto; }
+  .page.health .chart-screen .readout.ov-week > .ov-hero { grid-column: 1 / -1; border-right: 0; }
+  .page.health .chart-screen .readout.ov-week dd { white-space: nowrap; }
+  .page.health .chart-screen .readout.ov-week dd small { display: inline; overflow: visible; text-overflow: clip; margin: 0 0 0 5px; }
+}
+
+/* Very narrow screens: three readout cells in a row leaves ~75px of text each, which breaks the
+ * labels and the figures. Two columns (full width for a cell alone in the last row) keep the
+ * instrument look — silk label, mono figure, hairline dividers — and give every value room. */
+@container page (max-width: 400px) {
+  .page.health .chart-screen .readout > div { grid-column: span 3; }
+  .page.health .chart-screen .readout:not(.ov-week) > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+/* The section tab row scrolls sideways, so its right edge fades while more tabs remain and comes
+ * back to full strength once the last one is in view (HealthPage sets data-more). The overlay is
+ * on the body, not the scroller: an absolutely positioned child would scroll away with the tabs.
+ * The mask keeps the active tab's underline clear. */
+@container page (max-width: 760px) {
+  .health-body { position: relative; }
+  .health-body::after {
+    content: ""; position: absolute; right: 0; top: var(--top-h, 0px); width: 32px; height: var(--pin-h, 45px);
+    background: linear-gradient(to right, transparent, var(--face));
+    transform: translateY(calc(-1 * var(--hide, 0px)));
+    pointer-events: none; z-index: var(--z-sticky); opacity: 0; transition: opacity 140ms var(--ease);
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 3px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 3px), transparent);
+  }
+  .page.chrome-settle .health-body::after { transition: transform 180ms var(--ease), opacity 140ms var(--ease); }
+  .health-body:has(> .sec-nav[data-more="1"])::after { opacity: 1; }
+}
+
+.ov-empty { margin: 0; padding: 14px 12px; font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--rule); }
+.ov-empty a { color: var(--ink); text-underline-offset: 2px; }
+.chart-screen .readout dd small { margin-left: 5px; }
+.ov-none { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 9px 12px; font-size: 12px; color: var(--s-ink-2); border-bottom: 1px solid var(--grat-2); }
+.ov-none .silk { color: var(--s-ink-3); }
+@container page (max-width: 760px) {
+  /* Pin header: title on its own line, actions underneath, all at touch size. */
+  .pin-hd { flex-wrap: wrap; row-gap: 0; padding: 2px 6px 4px 2px; }
+  .pin-hd .fill { display: none; }
+  .pin-t { flex: 1 1 calc(100% - 48px); padding: 10px 0 6px; }
+  .pin-hd > .key { height: 44px; }
+  .pin-hd > .key.sq { width: 44px; }
+  .pin-hd > button:nth-of-type(2) { margin-left: 40px; }
+  .pin-hd > button:nth-of-type(3) { margin-left: auto; }
+  .pin-hd > .key:not(.sq) { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 13px; padding: 0 8px; }
+  .pin-meta { padding-top: 8px; }
+}

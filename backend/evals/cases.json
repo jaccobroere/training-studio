@@ -1,0 +1,466 @@
+[
+ {
+  "id": "series-skating",
+  "tier": "change",
+  "message": "Add a weekly skating session every Monday at 19:30, 60 minutes, starting next week.",
+  "writes": "change",
+  "must_call": [
+   "change"
+  ],
+  "ops": [
+   {
+    "op": "create_series",
+    "where": {
+     "rule.weekdays": [
+      0
+     ],
+     "type": "skate",
+     "time": "19:30"
+    }
+   }
+  ],
+  "tool_input": {
+   "change": [
+    "ice-skate"
+   ]
+  },
+  "tool_input_not": {
+   "change": [
+    "\"tags\": \\[\"[^\\]]"
+   ]
+  }
+ },
+ {
+  "id": "gym-thursday",
+  "tier": "change",
+  "message": "Add a gym session this Thursday: back squat 3x5 at 80 kg, Romanian deadlift 3x8 and plank 3x1 min.",
+  "writes": "change",
+  "must_call": [
+   "change"
+  ],
+  "ops": [
+   {
+    "op": "add_workout",
+    "where": {
+     "date": "2026-10-15",
+     "type": "strength"
+    },
+    "items": [
+     "back-squat",
+     "romanian-deadlift",
+     "plank"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "move-tomorrow",
+  "tier": "change",
+  "message": "Move tomorrow's run to Friday.",
+  "writes": "change",
+  "ops": [
+   {
+    "op": "move_workout",
+    "where": {
+     "id": "w-easy",
+     "date": "2026-10-16"
+    }
+   }
+  ]
+ },
+ {
+  "id": "skip-gym",
+  "tier": "change",
+  "message": "Skip this week's gym, I'm travelling.",
+  "writes": "change",
+  "ops": [
+   {
+    "op": "set_workout_status",
+    "where": {
+     "id": "w-gym",
+     "status": "skipped"
+    }
+   }
+  ]
+ },
+ {
+  "id": "add-easy-run",
+  "tier": "change",
+  "message": "Add an easy 8 km run next Tuesday morning.",
+  "writes": "change",
+  "ops": [
+   {
+    "op": "add_workout",
+    "where": {
+     "date": "2026-10-20",
+     "type": "run"
+    }
+   }
+  ]
+ },
+ {
+  "id": "deload-week",
+  "tier": "change",
+  "message": "Make next week a deload week.",
+  "writes": "any",
+  "must_call_any": [
+   "change",
+   "propose"
+  ],
+  "seed": [
+   {
+    "op": "add_workout",
+    "id": "w-n-easy",
+    "date": "2026-10-19",
+    "title": "Easy run",
+    "type": "run",
+    "items": [
+     {
+      "exercise_id": "easy-run",
+      "distance_km": 8,
+      "intensity": "easy"
+     }
+    ]
+   },
+   {
+    "op": "add_workout",
+    "id": "w-n-tempo",
+    "date": "2026-10-22",
+    "title": "Tempo run",
+    "type": "run",
+    "items": [
+     {
+      "exercise_id": "tempo-run",
+      "duration_min": 35,
+      "intensity": "tempo"
+     }
+    ]
+   },
+   {
+    "op": "add_workout",
+    "id": "w-n-gym",
+    "date": "2026-10-24",
+    "title": "Gym A",
+    "type": "strength",
+    "tags": [
+     "gym"
+    ],
+    "items": [
+     {
+      "exercise_id": "back-squat",
+      "sets": 4,
+      "reps": "5",
+      "load": "80 kg"
+     },
+     {
+      "exercise_id": "romanian-deadlift",
+      "sets": 3,
+      "reps": "8"
+     },
+     {
+      "exercise_id": "plank",
+      "sets": 3,
+      "duration_min": 1
+     }
+    ]
+   },
+   {
+    "op": "add_workout",
+    "id": "w-n-long",
+    "date": "2026-10-25",
+    "title": "Long run",
+    "type": "run",
+    "tags": [
+     "long"
+    ],
+    "items": [
+     {
+      "exercise_id": "long-run",
+      "distance_km": 18,
+      "intensity": "easy"
+     }
+    ]
+   }
+  ],
+  "ops_any": [
+   {
+    "op": "update_workout"
+   },
+   {
+    "op": "delete_workout"
+   },
+   {
+    "op": "set_workout_status"
+   },
+   {
+    "op": "bulk_delete"
+   }
+  ]
+ },
+ {
+  "id": "series-following",
+  "tier": "change",
+  "message": "From next week on, make my Tuesday skating 75 minutes instead of 60.",
+  "writes": "change",
+  "ops_any": [
+   {
+    "op": "update_series"
+   },
+   {
+    "op": "update_workout",
+    "where": {
+     "scope": "following"
+    }
+   }
+  ]
+ },
+ {
+  "id": "block-10k",
+  "tier": "block",
+  "message": "Draft a 10K block for my race on Sunday 13 December, around my Tuesday skating.",
+  "writes": "propose",
+  "must_call": [
+   "propose",
+   "read_guide"
+  ],
+  "must_not_call": [
+   "change"
+  ],
+  "ops": [
+   {
+    "op": "add_workout",
+    "where": {
+     "type": "run"
+    }
+   }
+  ],
+  "no_long_on_weekday": 2
+ },
+ {
+  "id": "block-half",
+  "tier": "block",
+  "message": "Plan a half marathon block for me, the race is on Sunday 7 March 2027.",
+  "writes": "propose",
+  "must_call": [
+   "propose",
+   "read_guide"
+  ],
+  "must_not_call": [
+   "change"
+  ]
+ },
+ {
+  "id": "block-marathon-start",
+  "tier": "block",
+  "message": "Can you draft the first four weeks of my Rotterdam marathon build, tagged rotterdam-2027?",
+  "writes": "propose",
+  "must_not_call": [
+   "change"
+  ],
+  "ops": [
+   {
+    "op": "add_workout",
+    "where": {
+     "tags": [
+      "rotterdam-2027"
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "id": "question-move",
+  "tier": "why",
+  "message": "Could I do the long run on Saturday instead?",
+  "writes": "propose_or_none",
+  "must_not_call": [
+   "change"
+  ]
+ },
+ {
+  "id": "demo-link",
+  "tier": "change",
+  "message": "Attach a good demo video link to my Nordic curl exercise.",
+  "writes": "change",
+  "must_call": [
+   "change"
+  ],
+  "ops_any": [
+   {
+    "op": "attach_link",
+    "where": {
+     "id": "nordic-curl"
+    }
+   },
+   {
+    "op": "update_exercise",
+    "where": {
+     "id": "nordic-curl"
+    }
+   }
+  ]
+ },
+ {
+  "id": "new-exercise-with-link",
+  "tier": "change",
+  "message": "Add Copenhagen adductor side-lying raises as a new exercise, with a demo link.",
+  "writes": "change",
+  "must_call": [
+   "change"
+  ],
+  "ops": [
+   {
+    "op": "add_exercise"
+   }
+  ],
+  "ops_any": [
+   {
+    "op": "attach_link"
+   },
+   {
+    "op": "add_exercise",
+    "where": {
+     "media.0.kind": "link"
+    }
+   }
+  ]
+ },
+ {
+  "id": "profile-interview",
+  "tier": "question",
+  "profile": "empty",
+  "message": "Hi! Can you help me plan my training?",
+  "writes": "none",
+  "must_ask": true
+ },
+ {
+  "id": "profile-write",
+  "tier": "change",
+  "profile": "empty",
+  "message": "I'm training for a 10K on 13 December. I can train Monday, Wednesday, Thursday and Saturday, I run about 25 km a week now, my left knee is sometimes sore and I prefer morning runs. Please save this to my profile.",
+  "writes": "change",
+  "ops": [
+   {
+    "op": "update_profile",
+    "contains": [
+     "10K",
+     "knee"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "analysis-sleep-hrv",
+  "tier": "why",
+  "data": true,
+  "message": "Over the last 90 days, is there a correlation between how long I sleep and my HRV the next morning? Compute it.",
+  "writes": "none",
+  "must_call": [
+   "run_analysis"
+  ]
+ },
+ {
+  "id": "metrics-rhr",
+  "tier": "fact",
+  "data": true,
+  "message": "What was my average resting heart rate over the last two weeks?",
+  "writes": "none",
+  "must_call_any": [
+   "get_daily_metrics",
+   "run_analysis"
+  ],
+  "must_include": [
+   "bpm"
+  ]
+ },
+ {
+  "id": "guide-taper",
+  "tier": "why",
+  "message": "How long should my marathon taper be?",
+  "writes": "none",
+  "must_call": [
+   "read_guide"
+  ],
+  "must_include": [
+   "coaching guide"
+  ]
+ },
+ {
+  "id": "never-delete-logged",
+  "tier": "change",
+  "message": "Clean up last week: delete everything that was on it.",
+  "writes": "any",
+  "ops_absent": [
+   "delete_activity"
+  ],
+  "logged_kept": true
+ },
+ {
+  "id": "fact-this-week",
+  "tier": "check",
+  "message": "What's on my plan this week?",
+  "writes": "none",
+  "must_call": [
+   "get_calendar"
+  ],
+  "must_include": [
+   "skat",
+   "gym|Gym"
+  ]
+ },
+ {
+  "id": "planned-vs-actual",
+  "tier": "check",
+  "message": "How much did I run last week compared with what was planned?",
+  "writes": "none",
+  "must_call_any": [
+   "get_calendar",
+   "get_activities"
+  ]
+ },
+ {
+  "id": "ambiguous-run",
+  "tier": "question",
+  "message": "Move my run to next week.",
+  "writes": "any",
+  "must_ask_or_write": true
+ },
+ {
+  "id": "chart-hrv-7day",
+  "tier": "why",
+  "data": true,
+  "message": "Show me a chart of my HRV over the last 60 days with a 7-day average.",
+  "writes": "none",
+  "must_call": [
+   "run_analysis"
+  ],
+  "must_not_call": [
+   "change",
+   "propose"
+  ],
+  "tool_input": {
+   "run_analysis": [
+    "rolling\\(\\s*(window\\s*=\\s*)?7",
+    "chart\\("
+   ]
+  },
+  "chart_x": "time"
+ },
+ {
+  "id": "pin-that",
+  "tier": "fact",
+  "data": true,
+  "before": [
+   "Chart my resting heart rate over the last 30 days."
+  ],
+  "message": "Pin that.",
+  "writes": "none",
+  "must_call": [
+   "pin_analysis"
+  ],
+  "must_not_call": [
+   "change",
+   "propose"
+  ]
+ }
+]

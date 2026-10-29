@@ -1,0 +1,80 @@
+# Bundled front door for Training Studio (compose.yml, service `caddy`).
+#
+# SITE_ADDRESS (default ":80") picks the mode:
+#   :80                    plain HTTP, published on the host as HTTP_PORT (default 8080).
+#                          Fine for http://localhost and a trusted LAN.
+#   training.example.com   automatic HTTPS (Let's Encrypt). Point DNS at the host and set
+#                          HTTP_PORT=80 and HTTPS_PORT=443 so the ACME challenge can reach it.
+# Behind another TLS-terminating proxy, keep ":80" and set TRUSTED_PROXIES (for example
+# "private_ranges") so the outer proxy's X-Forwarded-Proto reaches the app: that decides
+# whether the session cookie is the Secure `__Host-` one.
+{
+	servers {
+		trusted_proxies static {$TRUSTED_PROXIES:127.0.0.1/32}
+	}
+}
+
+{$SITE_ADDRESS::80} {
+	# Training URLs carry dates and record ids: no access log.
+	log {
+		output discard
+	}
+
+	# Only the upload routes may carry a large body; everything else is small JSON.
+	@upload {
+		path /api/garmin/upload /api/media* /api/chat/attachments*
+	}
+	@small_body {
+		not {
+			path /api/garmin/upload /api/media* /api/chat/attachments*
+		}
+	}
+	# File cap: 100 MiB, plus 1 MiB for multipart framing and other fields.
+	request_body @upload {
+		max_size 101MiB
+	}
+	request_body @small_body {
+		max_size 1MB
+	}
+	encode zstd gzip
+
+	header {
+		# Ignored by browsers over plain HTTP; takes effect once SITE_ADDRESS serves HTTPS.
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Robots-Tag "noindex, nofollow"
+		# Fonts are bundled; charts are canvas/SVG. OSM tiles are the only third-party image
+		# host: Leaflet loads them as <img>, so img-src covers them and connect-src stays
+		# 'self'. The app otherwise calls only its own API.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		Permissions-Policy "geolocation=(), camera=(), microphone=()"
+	}
+
+	handle /health {
+		reverse_proxy app:8080
+	}
+
+	handle /api/* {
+		# flush_interval -1: stream assistant replies (SSE) without buffering.
+		reverse_proxy app:8080 {
+			flush_interval -1
+		}
+	}
+
+	handle /assets/* {
+		root * /srv/static
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	handle {
+		# The shell names the current release's fingerprinted assets: never cache it, so the
+		# next load after an upgrade picks up the new release.
+		header Cache-Control "no-store"
+		root * /srv/static
+		try_files {path} /index.html
+		file_server
+	}
+}

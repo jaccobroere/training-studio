@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health · Training Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=Doto:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="c.css">
+<link rel="stylesheet" href="parts.css">
+<style>
+  .shell { height: auto; min-height: 100vh; }
+  .shell .rail { height: auto; }
+  .hl { display: grid; grid-template-columns: 196px 1fr 46px; min-width: 0; }
+  .secnav { background: var(--face); border-right: 1px solid var(--rule); padding: 16px 10px; display: flex; flex-direction: column; gap: 1px; }
+  .secnav .silk { padding: 2px 10px 10px; }
+  .secnav a { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 3px; text-decoration: none; color: var(--ink-2); font-size: 13px; font-weight: 500; }
+  .secnav a::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1.25px solid var(--rule-2); flex: none; }
+  .secnav a:hover { background: var(--face-sunk); color: var(--ink); }
+  .secnav a[aria-current] { background: var(--ink); color: var(--face-2); }
+  .secnav a[aria-current]::before { background: var(--face-2); border-color: var(--face-2); }
+  .secnav hr { border: 0; border-top: 1px solid var(--rule); margin: 8px 4px; }
+  .secnav .qual::after { content: "4 gaps"; margin-left: auto; font: 500 10px/1 var(--mono); color: var(--ink-3); }
+
+  .content { min-width: 0; padding: 0 22px 28px; }
+  .pbar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; height: 60px; background: var(--chassis); border-bottom: 1px solid var(--rule-2); margin: 0 -22px 18px; padding: 0 22px; }
+  .pbar h1 { font: 600 19px/1 var(--sans); letter-spacing: -0.01em; margin-right: 10px; }
+  .pbar .seg .key { min-width: 44px; }
+  .thru { display: flex; flex-direction: column; gap: 3px; }
+  .thru .v { font: 500 12px/1 var(--mono); }
+
+  .col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .mod { grid-column: span 2; background: var(--face); border: 1px solid var(--rule-2); border-radius: var(--r); padding: 0 10px 10px; min-width: 0; }
+  .mod.small { grid-column: span 1; }
+  .mod-hd { display: flex; align-items: center; gap: 12px; height: 46px; }
+  .mod-hd h2 { font: 600 14px/1.2 var(--sans); }
+  .mod-hd .meta { font: 400 11.5px/1 var(--mono); color: var(--ink-2); white-space: nowrap; }
+  .mod-hd .key { height: 28px; }
+  .screen .plot { padding: 4px 4px 2px; }
+  .screen .plot svg { display: block; }
+  .mod-ft { display: flex; gap: 14px; padding: 8px 2px 0; font-size: 11.5px; color: var(--ink-2); }
+  .mod-ft .k { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { display: inline-block; width: 16px; height: 8px; border-radius: 1px; ; outline: 1px solid var(--grat); outline-offset: -1px }
+  .readout dd.big { font: 700 17px/1 var(--dot); letter-spacing: 0.02em; }
+  .readout .sig dd { color: var(--s-ink); }
+
+  .contab { border-left: 1px solid var(--rule-2); background: var(--face); display: flex; flex-direction: column; align-items: center; padding-top: 12px; }
+  .contab .key { writing-mode: vertical-rl; height: auto; width: 30px; padding: 12px 0; gap: 8px; }
+  .contab .key svg { transform: rotate(90deg); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="rail"></div>
+  <div class="hl">
+    <nav class="secnav" aria-label="Health sections">
+      <span class="silk">Health</span>
+      <a href="#" aria-current="page">Overview</a>
+      <a href="#">Sleep</a><a href="#">Recovery</a><a href="#">Training load</a><a href="#">Running</a><a href="#">Run detail</a><a href="#">Skating</a><a href="#">Strength</a><a href="#">Skills &amp; mobility</a><a href="#">Body</a><a href="#">Relationships</a>
+      <hr>
+      <a href="#" class="qual">Data quality</a>
+      <a href="#">My board</a>
+    </nav>
+    <main class="content">
+      <div class="pbar" role="toolbar" aria-label="Period">
+        <h1>Overview</h1>
+        <div class="seg" role="radiogroup" aria-label="Period">
+          <button class="key">7d</button><button class="key">28d</button><button class="key is-on" aria-checked="true">90d</button><button class="key">Season</button><button class="key">All</button><button class="key">Custom…</button>
+        </div>
+        <span class="mono" style="font-size:12px;color:var(--ink-2)">15 Oct 2026 – 12 Jan 2027</span>
+        <span class="fill"></span>
+        <div class="thru"><span class="silk">Data through</span><span class="v">13 Jan 07:12 · Garmin</span></div>
+        <span class="div" style="width:1px;height:26px;background:var(--rule-2)"></span>
+        <button class="key">Customise</button>
+      </div>
+
+      <div class="col">
+        <section class="mod" aria-labelledby="t-hrv">
+          <div class="mod-hd"><h2 id="t-hrv">HRV · nightly</h2><span class="meta" id="m-hrv"></span><span class="fill"></span><button class="key flat">Options</button><button class="key">Discuss</button></div>
+          <div class="screen"><dl class="readout" id="r-hrv"></dl><div class="plot" id="c-hrv"></div></div>
+          <div class="mod-ft"><span class="k"><span class="sw" style="background:var(--screen);box-shadow:inset 0 -4px 0 var(--s-ink)"></span>Nightly value</span><span class="k"><span class="sw" style="background:var(--screen);box-shadow:inset 0 0 0 20px var(--s-band)"></span>Baseline: trailing 28 nights, mean ± 1 SD (needs ≥ 14)</span><span class="k">Gaps = watch not worn; not interpolated</span></div>
+        </section>
+
+        <section class="mod small" aria-labelledby="t-rhr">
+          <div class="mod-hd"><h2 id="t-rhr">Resting HR</h2><span class="meta" id="m-rhr"></span><span class="fill"></span><button class="key">Discuss</button></div>
+          <div class="screen"><dl class="readout" id="r-rhr"></dl><div class="plot" id="c-rhr"></div></div>
+        </section>
+        <section class="mod small" aria-labelledby="t-slp">
+          <div class="mod-hd"><h2 id="t-slp">Sleep · bed → wake</h2><span class="meta" id="m-slp"></span><span class="fill"></span><button class="key">Discuss</button></div>
+          <div class="screen"><dl class="readout" id="r-slp"></dl><div class="plot" id="c-slp"></div></div>
+        </section>
+
+        <section class="mod" aria-labelledby="t-km">
+          <div class="mod-hd"><h2 id="t-km">Running distance · weekly</h2><span class="meta" id="m-km"></span><span class="fill"></span><button class="key flat">Options</button><button class="key">Discuss</button></div>
+          <div class="screen"><dl class="readout" id="r-km"></dl><div class="plot" id="c-km"></div></div>
+          <div class="mod-ft"><span class="k"><span class="sw" style="background:var(--s-ink-2)"></span>Actual</span><span class="k"><span class="sw" style="border:1px dashed var(--ink)"></span>Planned (stored for the current week only)</span><span class="k">W3 in progress (Wed 13) · chart range fixed at 16 weeks</span></div>
+        </section>
+
+        <section class="mod" aria-labelledby="t-run">
+          <div class="mod-hd"><h2 id="t-run">Run detail · threshold session</h2><span class="meta" id="m-run"></span><span class="fill"></span><button class="key flat">Pick run ${ICON.down}</button><button class="key">Discuss A–B</button></div>
+          <div class="screen"><dl class="readout" id="r-run"></dl><div class="plot" id="c-run"></div></div>
+          <div class="mod-ft"><span class="k"><span class="sw" style="background:var(--signal)"></span>Cursors A–B: drag, or ←/→ with A/B selected</span><span class="k"><span class="sw" style="background:var(--screen);box-shadow:inset 0 0 0 20px var(--s-band)"></span>Rep segments (from lap data)</span></div>
+        </section>
+      </div>
+      <p class="mono" style="font-size:10.5px;color:var(--ink-3);margin-top:16px">Demo data — not real measurements.</p>
+    </main>
+    <aside class="contab"><button class="key" aria-expanded="false" aria-label="Open console">${ICON.console}Console · 1 thread</button></aside>
+  </div>
+</div>
+<script src="../data.js"></script>
+<script src="c.js"></script>
+<script src="charts.js"></script>
+<script>
+  document.getElementById("rail").outerHTML = rail("health");
+  document.querySelectorAll(".mod-hd, .contab").forEach((el) => { el.innerHTML = el.innerHTML.replace(/\$\{ICON\.(\w+)\}/g, (_, k) => ICON[k]); });
+  const $ = (id) => document.getElementById(id);
+  const ro = (cells) => cells.map(([k, v, cls]) => `<div class="${cls || ""}"><dt>${k}</dt><dd class="${cls === "big" ? "big" : ""}">${v}</dd></div>`).join("");
+
+  const hv = nightly($("c-hrv"), { key: "hrv", lo: 40, hi: 80, step: 5, unit: "ms", label: "Nightly HRV with baseline band, 90 days" });
+  $("m-hrv").textContent = `ms · n = ${hv.n} of 90 nights`;
+  $("r-hrv").innerHTML = ro([["Latest · " + fmtD(hv.lastDate), `<span style="font:700 21px/0.8 var(--dot)">${hv.last}</span><small>ms</small>`], ["Baseline", `${f1(hv.base[0])} ± ${f1(hv.base[1])}<small>ms</small>`], ["7-night mean", `${f1(hv.m7)}<small>ms · n=${hv.n7}</small>`], ["90d range", `${hv.min}–${hv.max}<small>ms</small>`], ["Max", `${hv.max}<small>${fmtD(hv.maxDate)}</small>`]]);
+
+  const rh = nightly($("c-rhr"), { key: "rhr", lo: 40, hi: 54, step: 2, unit: "bpm", label: "Resting heart rate, 90 days", height: 200 });
+  $("m-rhr").textContent = `bpm · n = ${rh.n}`;
+  $("r-rhr").innerHTML = ro([["Latest · " + fmtD(rh.lastDate), `${rh.last}<small>bpm</small>`], ["Baseline", `${f1(rh.base[0])} ± ${f1(rh.base[1])}`], ["7-night", `${f1(rh.m7)}`]]);
+
+  const sl = sleepWindow($("c-slp"), 42);
+  $("m-slp").textContent = `last 42 nights · n = ${sl.n}`;
+  $("r-slp").innerHTML = ro([["Mean bed", clock(sl.bed)], ["Mean wake", clock(sl.wake)], ["Mean asleep", `${f1(sl.sleep)}<small>h</small>`], ["Last night", `${clock(sl.last.bed)}–${clock(sl.last.wake)}`]]);
+
+  const km = weeklyKm($("c-km"));
+  $("m-km").textContent = `km · n = ${km.n} weeks`;
+  $("r-km").innerHTML = ro([["This week W3", `18<small>of 50 plan · range 45–55</small>`], ["Last full · " + km.last.label, `${km.last.runKm}<small>km</small>`], ["4-wk mean", `${f1(km.m4)}<small>km</small>`], ["Max", `${km.max}<small>${km.maxW}</small>`]]);
+
+  const rd = runDetail($("c-run"));
+  $("m-run").textContent = `pace · HR · ${rd.n} samples @ 10 s`;
+  $("r-run").innerHTML = ro([["Cursor A", mmss(rd.A)], ["Cursor B", mmss(rd.B)], ["Δt", mmss(rd.dt), "sig"], ["Mean pace", `${pace(rd.pace)}<small>/km</small>`], ["Mean HR", `${Math.round(rd.hr)}<small>bpm</small>`], ["Max HR", `${rd.max}<small>bpm</small>`], ["Samples", `${rd.ns}`]]);
+</script>
+</body>
+</html>

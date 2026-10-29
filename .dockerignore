@@ -1,0 +1,13 @@
+.env
+.git
+secrets/
+data/
+backend/data/
+**/node_modules
+**/.venv
+**/__pycache__
+**/.pytest_cache
+frontend/dist
+docs/
+backend/evals/results.json
+backend/evals/report.md

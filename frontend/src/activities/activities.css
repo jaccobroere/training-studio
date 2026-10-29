@@ -1,0 +1,386 @@
+/* The Activities page and the activity view: summary, tabs, then one tab's screens. It responds to its
+ * own width (container `av`), so it is the same inside the chat-docked or the full-width column.
+ * Rhythm: one inset (--av-pad) and one card gap (--av-gap) for the whole view. Every band of every
+ * card — header, summary/readout cell, legend, note, table cell, lap row — starts on the same
+ * vertical line, so the view reads as one instrument rather than a stack of boxes. The wrapper
+ * (not .av) is the container: a container query never matches its own element, and the inset has
+ * to be declared on the card itself. Touch keys are 44px on narrow widths. */
+.av-wrap { container: av / inline-size; min-width: 0; }
+.av { --av-pad: 16px; --av-gap: 16px; display: flex; flex-direction: column; gap: var(--av-gap); min-width: 0; }
+@container av (min-width: 760px) { .av { --av-pad: 20px; --av-gap: 20px; } }
+@container av (min-width: 1000px) { .av { --av-pad: 24px; } }
+.av-hd { display: flex; align-items: center; gap: 12px; min-width: 0; flex-wrap: wrap; }
+.av-hd-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 200px; }
+.av-hd h3 { font: 600 15px/1.25 var(--sans); overflow-wrap: anywhere; }
+.av-type { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.av-type-f { display: flex; align-items: center; gap: 6px; }
+.av-type-f .select { height: 30px; }
+.av-type-o { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ink-2); }
+.av-type-o .key { height: 30px; }
+.av-hd .mono { font-size: 11px; color: var(--ink-3); }
+
+.av-sum { display: flex; flex-wrap: wrap; background: var(--screen-2); border: 1px solid var(--rule-2);
+  border-radius: 3px; overflow: hidden; }
+.av-sum > div { flex: 1 1 104px; padding: 12px var(--av-pad); border-right: 1px solid var(--grat-2); border-bottom: 1px solid var(--grat-2); margin: 0 -1px -1px 0; min-width: 0; }
+.av-sum dt { font: 600 9px/1 var(--sans); letter-spacing: 0.09em; text-transform: uppercase; color: var(--s-ink-3); margin-bottom: 6px; }
+.av-sum dd { font: 500 16px/1.1 var(--mono); font-feature-settings: "tnum", "zero"; color: var(--s-ink); white-space: nowrap; }
+.av-sum dd small { font-size: 10.5px; color: var(--s-ink-2); }
+/* A unit trails the value on its own line's baseline; a note takes a line of its own below. */
+.av-sum dd small.unit { display: inline; margin-left: 3px; }
+.av-sum dd small.note { display: block; margin: 4px 0 0; white-space: normal; overflow-wrap: anywhere; }
+
+/* Segmented keys: compact on a pointer, 44px on a phone. Tabs fill the width there. */
+.av .seg .key { height: 32px; padding: 0 12px; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12.5px; }
+.av-tabs .key { min-width: 76px; }
+.av-panel { min-width: 0; }
+.av-stack { display: flex; flex-direction: column; gap: var(--av-gap); min-width: 0; }
+.av-ctl { display: flex; align-items: center; gap: 8px; padding: 12px var(--av-pad); border-bottom: 1px solid var(--grat-2); min-height: 56px; flex-wrap: wrap; }
+.av-ctl .silk { color: var(--s-ink-3); }
+.av-notes { font-size: 11px; color: var(--ink-3); padding: 0 var(--av-pad); }
+
+/* Choice: all options in one row when wide; three keys + a native "More" picker when narrow. */
+.ch-narrow { display: none; align-items: center; gap: 8px; }
+.key.more { position: relative; gap: 6px; padding: 0 12px; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12.5px; height: 32px; }
+.key.more svg { width: 12px; height: 12px; stroke-width: 1.8; }
+.key.more select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; }
+.key.more:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; }
+.key.more.is-on { background: var(--ink); color: var(--face-2); border-color: var(--ink); }
+
+/* Disclosure panels (secondary charts and tables): a 48px header row, the body on open. */
+.fold > summary { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 var(--av-pad); cursor: pointer; list-style: none; }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary .silk { color: var(--s-ink-3); flex: none; }
+.fold-hint { flex: 1; min-width: 0; text-align: right; font-size: 11px; color: var(--s-ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fold > summary svg, .bk svg { flex: none; width: 12px; height: 12px; fill: none; stroke: var(--s-ink-2); stroke-width: 1.8; transition: transform 160ms var(--ease); }
+.fold[open] > summary svg, .bk.open svg { transform: rotate(180deg); }
+.fold[open] > summary { border-bottom: 1px solid var(--grat-2); }
+.fold > summary:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.fold-body { container: avr / inline-size; min-width: 0; }
+.fold-body .readout { border-top: 0; }
+
+.chart-note p { margin: 0; }
+/* A link in a note reads as an in-app link (ink, quiet until hover), never browser blue. */
+.av .chart-note a { color: var(--s-ink); text-decoration: none; text-underline-offset: 2px; }
+.av .chart-note a:hover { text-decoration: underline; }
+.note-more { margin-top: 0; }
+.note-more summary { display: flex; align-items: center; min-height: 32px; cursor: pointer; color: var(--s-ink-2); text-decoration: underline; text-underline-offset: 2px; list-style: none; }
+.note-more summary::-webkit-details-marker { display: none; }
+.note-more summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.note-more p { padding-bottom: 4px; }
+
+.av .echart { touch-action: pan-y; }
+/* The card's bands: one inset rhythm (--av-pad), the same on every band, so a readout label, a
+ * legend swatch, a note's first glyph and a table's first cell share a left edge. */
+.av .chart-screen .readout > div, .av .chart-screen .readout.compact > div { padding: 10px var(--av-pad) 9px; }
+.av .chart-screen .readout > div:first-child dd { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* The key: a block of items on a grid, never a running sentence of swatches. A fixed 16×10 cell
+ * keeps every label starting on the same x, and whole items wrap, not their labels. */
+.av .legend {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 20px; align-items: start;
+  border-top: 1px solid var(--grat-2);
+  padding: 10px var(--av-pad) 11px;
+  list-style: none; margin: 0;
+}
+.av .lg-i { display: flex; align-items: flex-start; gap: 8px; min-width: 0;
+  font: 500 11px/1.35 var(--mono); color: var(--s-ink-2); }
+.av .lg-i svg { flex: none; width: 16px; height: 10px; margin-top: 2px; border: 0; }
+.av .lg-i small { display: block; margin-top: 1px; font-size: 10px; line-height: 1.3; color: var(--s-ink-3); }
+/* A key item that explains a mark in a sentence takes two columns rather than a tower of text. */
+.av .legend > .wide { grid-column: span 2; }
+/* A swatch cell for marks that are not already a 16×10 SVG (the route's circles and ticks). */
+.av .lg-sw { flex: none; display: flex; align-items: center; justify-content: center; width: 16px; height: 10px; margin-top: 2px; }
+
+.av .chart-note { padding: 8px var(--av-pad) 12px; }
+/* The legend already draws the hairline above the note; a readout draws its own below. */
+.av .legend + .chart-note, .av .readout + .chart-note { border-top: 0; }
+.av .note-more p { padding-bottom: 0; }
+.av-route-body { display: flex; align-items: center; gap: 8px; padding: 10px var(--av-pad) 4px; }
+.route-svg { flex: 1 1 auto; min-width: 0; width: 100%; max-width: 480px; height: auto; display: block; margin: 0 auto; }
+.route-t { font: 500 9.5px var(--mono); fill: var(--s-ink-2); }
+.route-t.strong { font-weight: 600; fill: var(--s-ink); }
+
+/* Route on OpenStreetMap tiles. Height comes from the caller (--route-h, set inline) and grows
+   on a wide fold; the screen colour is the background, so a blocked tile server costs nothing.
+   Only the tile pane is filtered — the trace and markers are separate panes and keep the
+   instrument's true colours in both themes. */
+.route-map { --route-h: 220px; flex: 1 1 auto; min-width: 0; width: 100%; height: var(--route-h);
+  position: relative; isolation: isolate; z-index: 0; overflow: hidden;
+  background: var(--screen); border: 1px solid var(--rule-2); border-radius: 3px; }
+.fold-body > .route-map { margin: 8px var(--av-pad) 4px; }
+/* A wide screen gets a taller screen as well as a wider one: at 260px the route would sit in a
+   letterbox in the middle of an 800px card. */
+@container avr (min-width: 640px) { .route-map { height: calc(var(--route-h) + 100px); } }
+
+.route-map-host { width: 100%; height: 100%; }
+.route-map .leaflet-container { width: 100%; height: 100%; background: var(--screen); color: var(--s-ink);
+  font: inherit; outline: none; }
+.route-map .leaflet-tile-pane { filter: saturate(0.22) brightness(1.04) contrast(0.9); }
+.route-map[data-dark="true"] .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(0.22) brightness(0.88) contrast(0.9); }
+
+.route-map .leaflet-control-attribution { padding: 1px 4px; border-radius: 2px 0 0 0;
+  background: color-mix(in oklch, var(--screen) 82%, transparent);
+  color: var(--s-ink-3); font: 500 9px/1.35 var(--mono); }
+.route-map .leaflet-control-attribution a { color: var(--s-ink-2); text-decoration: none; }
+.route-map .leaflet-bottom .leaflet-control-scale { margin: 0 0 6px 8px; }
+.route-map .leaflet-control-scale-line { padding: 1px 4px; border-color: var(--s-ink-3); border-top: none;
+  background: color-mix(in oklch, var(--screen) 78%, transparent);
+  color: var(--s-ink-2); font: 500 9px/1.25 var(--mono); text-shadow: none; }
+.route-map .leaflet-control-zoom { border: 1px solid var(--rule-2); border-radius: 2px; overflow: hidden; }
+.route-map .leaflet-bar a { width: 24px; height: 24px; line-height: 24px; font-size: 14px;
+  background: var(--face-2); color: var(--ink); border-bottom-color: var(--rule); }
+.route-map .leaflet-bar a:hover { background: var(--face); color: var(--ink); }
+.route-map .leaflet-bar a:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+
+/* Markers are divIcons built from these styles (never Leaflet's default PNGs): the same shapes
+   and tokens as the SVG fallback, on a screen-coloured halo so they stay legible over tiles. */
+.route-start, .route-finish, .route-n, .route-cursor, .route-pause, .route-gate i {
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--screen) 72%, transparent);
+}
+.route-start { display: block; width: 8px; height: 8px; border: 1.8px solid var(--s-ink); border-radius: 50%;
+  background: var(--screen); }
+.route-finish { display: block; width: 8px; height: 8px; background: var(--s-ink); }
+.route-n { display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--screen); border: 1px solid var(--s-ink-2); color: var(--s-ink-2);
+  font: 500 9px/1 var(--mono); }
+.route-cursor { display: block; width: 9px; height: 9px; border: 2.2px solid var(--signal); border-radius: 50%;
+  background: transparent; }
+/* A pause is a time hole, not a distance: the two bars in a dashed ring mark it even when the
+   watch did not move (so the dashed join is only a few pixels long). */
+.route-pause { display: block; width: 14px; height: 14px; border: 1px dashed var(--s-ink-2); border-radius: 50%;
+  background: var(--screen); position: relative; }
+.route-pause::before, .route-pause::after { content: ""; position: absolute; top: 3px; bottom: 3px; width: 1.4px;
+  background: var(--s-ink-2); }
+.route-pause::before { left: 4.4px; }
+.route-pause::after { right: 4.4px; }
+.route-gate { position: relative; display: block; width: 28px; height: 28px; }
+.route-gate i { position: absolute; left: 50%; top: 50%; width: 26px; height: 2.2px; margin: -1.1px 0 0 -13px;
+  background: var(--s-ink); }
+.route-gate b { position: absolute; left: 24px; top: 16px; font: 600 9.5px var(--mono); color: var(--s-ink);
+  letter-spacing: 0.02em; }
+.route-tip { padding: 2px 6px; border: 1px solid var(--rule-2); border-radius: 2px;
+  background: var(--face-2); color: var(--s-ink); font: 500 10px var(--mono); box-shadow: none; }
+.route-tip::before { display: none; }
+
+/* The route key: the same block as every other legend, its marks centred in the swatch cell. */
+.route-legend .rl { flex: none; display: inline-block; }
+.av .rl-line { width: 16px; height: 2px; background: var(--s-ink); border-radius: 1px; }
+.rl-pause { width: 12px; height: 12px; border: 1px dashed var(--s-ink-2); border-radius: 50%;
+  background: var(--screen); position: relative; }
+.rl-pause::before, .rl-pause::after { content: ""; position: absolute; top: 2.5px; bottom: 2.5px; width: 1.2px;
+  background: var(--s-ink-2); }
+.rl-pause::before { left: 3.6px; }
+.rl-pause::after { right: 3.6px; }
+.rl-start { width: 8px; height: 8px; border: 1.6px solid var(--s-ink); border-radius: 50%; background: var(--screen); }
+.rl-finish { width: 7px; height: 7px; background: var(--s-ink); margin-left: -1px; }
+.route-legend .rl-n { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%;
+  border: 1px solid var(--s-ink-2); color: var(--s-ink-2); font-size: 8px; line-height: 1; }
+.rl-rose { width: 12px; height: 12px; border: 1px dashed var(--s-ink-2); border-radius: 50%; }
+
+.rose { flex: 0 0 132px; display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0; }
+.rose svg { width: 132px; height: 132px; }
+.rose figcaption { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--s-ink-2); line-height: 1.4; }
+.rose figcaption b { color: var(--s-ink); font-weight: 600; }
+@container avr (max-width: 540px) {
+  .av-route-body { flex-direction: column; }
+  .rose { flex-basis: auto; flex-direction: row; gap: 12px; }
+  .rose svg { width: 112px; height: 112px; }
+  .rose figcaption { align-items: flex-start; }
+}
+
+.zones { list-style: none; padding: var(--av-pad); display: flex; flex-direction: column; gap: 8px; }
+.zones li { display: grid; grid-template-columns: 30px 62px minmax(0, 1fr) 54px 34px; align-items: center; gap: 8px; font-size: 11.5px; color: var(--s-ink); }
+.z-l { font-weight: 600; }
+.z-b, .z-p { color: var(--s-ink-2); }
+.z-v, .z-p { text-align: right; }
+.z-bar { height: 10px; background: var(--grat-2); border-radius: 1px; overflow: hidden; }
+.z-bar i { display: block; height: 100%; background: var(--s-ink); }
+.z-below { color: var(--s-ink-3) !important; }
+
+/* Lap, stint and ladder rows: time and speed lead; the rest is a small second line on a phone and
+ * its own columns when there is room. --k = number of secondary columns. */
+.laplist { --k: 3; min-width: 0; }
+.laplist ul { list-style: none; }
+.lr { display: grid; grid-template-columns: 56px 88px 76px repeat(var(--k), minmax(60px, 1fr)); align-items: center; padding: 0 var(--av-pad); min-height: 36px;
+  border-bottom: 1px solid var(--grat-2); font-size: 12.5px; color: var(--s-ink); }
+.lr > span { white-space: nowrap; }
+.lr .lr-sec { display: contents; }
+.lr .lr-sec > span { text-align: right; color: var(--s-ink); }
+.lr u { display: none; text-decoration: none; }
+.lr .lr-brk { display: none; }
+.lr .strong { font-weight: 600; }
+.lr-h { min-height: 32px; background: var(--screen-2); border-bottom: 1px solid var(--grat); font-size: 9px; color: var(--s-ink-3); }
+.lr-h .lr-sec > span { color: var(--s-ink-3); }
+.lr-n { display: flex; align-items: center; gap: 6px; }
+.lr-n em { font-style: normal; font-size: 9.5px; color: var(--s-ink-3); }
+.lr.best { background: var(--s-band); }
+.lr.part { color: var(--s-ink-3); }
+.lr.stop .lr-sec > span { color: var(--s-ink-2); }
+.best-tag { font: 600 9px/1 var(--mono); font-style: normal; padding: 3px 4px; border: 1px solid var(--s-ink-2); border-radius: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
+.lr.best .best-tag { background: var(--signal); color: var(--signal-ink); border-color: var(--signal-edge); }
+.laplist button.lr { width: 100%; text-align: left; cursor: pointer; min-height: 44px; background: transparent; color: var(--s-ink); }
+.laplist button.lr:hover { background: var(--screen-2); }
+.laplist button.lr.best { background: var(--s-band); }
+.laplist button.lr:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.laplist .lr.sel { box-shadow: inset 0 1.5px 0 var(--signal-edge), inset 0 -1.5px 0 var(--signal-edge); background: var(--s-band); }
+.laplist li.rest { height: 24px; }
+.laplist .act-more { margin: 4px var(--av-pad); min-height: 44px; }
+.tbl-note { font-size: 11px; line-height: 1.5; color: var(--s-ink-2); padding: 8px var(--av-pad) 12px; text-wrap: pretty; }
+
+/* Blocks: a summary row per block that opens to its laps, a thin rest divider between. */
+.bk-h, .bk { display: grid; grid-template-columns: 32px minmax(52px, 1fr) 40px 56px 56px 48px 12px; gap: 4px; align-items: center; padding: 0 var(--av-pad); text-align: right; width: 100%; }
+.bk-h { min-height: 32px; background: var(--screen-2); border-bottom: 1px solid var(--grat); font-size: 9px; color: var(--s-ink-3); }
+.bk-h > span, .bk > span { white-space: nowrap; }
+.bk-h > span:first-child, .bk > span:first-child { text-align: left; }
+.bk { min-height: 48px; font-size: 12.5px; color: var(--s-ink); border-bottom: 1px solid var(--grat-2); background: var(--screen); }
+.bk:hover { background: var(--screen-2); }
+.bk:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.bk.open { background: var(--screen-2); }
+.bk .strong { font-weight: 600; }
+.bk-n { font-weight: 600; }
+.bk-list { list-style: none; }
+.rest { display: flex; align-items: center; gap: 8px; height: 24px; padding: 0 var(--av-pad); font: 500 10px var(--mono); color: var(--s-ink-3); background: var(--screen); }
+.rest::before, .rest::after { content: ""; flex: 1; border-top: 1px dashed var(--grat); }
+.bk-body { border-bottom: 1px solid var(--grat); }
+.bk-body .laplist .lr:last-child { border-bottom: 0; }
+
+/* Efforts table (a real table: it has five columns that always fit) */
+.tbl-wrap { min-width: 0; }
+.av-tbl { width: 100%; border-collapse: collapse; background: var(--screen); border: 1px solid var(--rule-2); border-radius: 3px; overflow: hidden; font-size: 12px; }
+.av-tbl th { font: 600 9px/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s-ink-3); text-align: right; padding: 10px 8px 8px;
+  background: var(--screen-2); border-bottom: 1px solid var(--grat); white-space: nowrap; }
+.av-tbl td { text-align: right; padding: 10px 8px; border-bottom: 1px solid var(--grat-2); color: var(--s-ink); white-space: nowrap; }
+.av-tbl th:first-child, .av-tbl td:first-child { text-align: left; padding-left: var(--av-pad); }
+.av-tbl th:last-child, .av-tbl td:last-child { padding-right: var(--av-pad); }
+.av-tbl tr:last-child td { border-bottom: 0; }
+.av-tbl td.strong { font-weight: 600; }
+.av-tbl tr.best td { background: var(--s-band); }
+.av-tbl .best-tag { margin-left: 6px; }
+
+@container av (min-width: 641px) { .av .readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); } }
+/* Six cells in a 640-820px column are ~110px each: stack the note under the value instead of
+ * letting "max 168" spill into the next cell. A unit stays behind its value. */
+@container av (min-width: 641px) and (max-width: 819px) {
+  .av .readout dd small.note { display: block; margin: 3px 0 0; overflow: hidden; text-overflow: ellipsis; }
+}
+@container av (min-width: 820px) { .av .readout dd small.note { white-space: nowrap; } }
+
+@container av (max-width: 860px) { .av-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Phone: 44px keys, tabs fill the width, a three-by-three summary, lap rows on two lines. */
+@container av (max-width: 640px) {
+  .av .seg .key, .key.more { height: 44px; }
+  .av-tabs { display: flex; width: 100%; }
+  .av-tabs .key { flex: 1 1 0; min-width: 0; padding: 0 4px; }
+  .av-sum { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .av-sum > div { grid-column: span 2; }
+  .av-sum dd { font-size: 15px; }
+  .av-sum > div:last-child:nth-child(3n + 1) { grid-column: span 6; }
+  .av-sum > div:last-child:nth-child(3n + 2), .av-sum > div:nth-last-child(2):nth-child(3n + 1) { grid-column: span 3; }
+  .lr { grid-template-columns: 40px minmax(0, 1fr) minmax(0, 1fr); row-gap: 2px; padding: 8px var(--av-pad); min-height: 52px; align-content: center; }
+  .lr .lr-sec { display: flex; flex-wrap: wrap; grid-column: 2 / -1; gap: 2px 12px; font-size: 11px; }
+  .lr .lr-sec > span { text-align: left; color: var(--s-ink-2); }
+  .lr u { display: inline; color: var(--s-ink-3); }
+  .lr .lr-brk { display: block; flex-basis: 100%; height: 0; }
+  .lr > span.strong { font-size: 15px; }
+  .lr-n { grid-row: 1 / span 2; align-self: start; padding-top: 2px; flex-wrap: wrap; align-content: flex-start; }
+  .lr-n em { flex-basis: 100%; }
+  .lr-h { min-height: 32px; padding-top: 0; padding-bottom: 0; }
+  .lr-h .lr-sec { display: none; }
+  .lr-h .lr-n { grid-row: auto; padding-top: 0; }
+  .bk-h, .bk { grid-template-columns: 24px minmax(0, 1fr) 32px 48px 48px 40px 12px; gap: 5px; padding: 0 var(--av-pad); }
+  .bk { font-size: 12px; min-height: 52px; }
+  .av-ctl { padding: 10px var(--av-pad); }
+  /* On a phone the title + action take the first line and the axis switch its own: never a
+   * three-control scrum, and the same shape for every activity whatever its title length. */
+  .av-ctl > .seg { flex: 0 0 100%; max-width: max-content; }
+  .hide-narrow { display: none; }
+  .note-more summary { min-height: 44px; }
+  .zones li { grid-template-columns: 26px 58px minmax(0, 1fr) 50px 30px; gap: 8px; }
+  .av-tbl { font-size: 11.5px; }
+  .av-tbl th, .av-tbl td { padding-left: 6px; padding-right: 6px; }
+  .av-tbl th:first-child, .av-tbl td:first-child { padding-left: var(--av-pad); }
+  .av-tbl th:last-child, .av-tbl td:last-child { padding-right: var(--av-pad); }
+  .hide-s { display: none; }
+}
+@container av (max-width: 520px) {
+  .ch-wide { display: none; }
+  .ch-narrow { display: flex; }
+  /* Two key columns rather than one: a phone still reads the key in a block, not a column. */
+  .av .legend { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; }
+  .av-tbl td { padding-top: 12px; padding-bottom: 12px; }
+}
+@container av (min-width: 641px) { .lr { grid-template-columns: 56px 88px 76px repeat(var(--k), minmax(60px, 84px)); } .lr-n em { margin-left: 0; } .laplist { --k: 3; } }
+@media (prefers-reduced-motion: reduce) { .fold > summary svg, .bk svg { transition: none; } }
+
+/* ---------- The page: a list pane and the activity pane ---------- */
+.act-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); }
+.act-pane { min-height: 0; overflow: auto; position: relative; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.act-listpane { border-right: 1px solid var(--rule); background: var(--face); display: flex; flex-direction: column; }
+.act-listpane > * { flex-shrink: 0; }
+.act-detail { padding: 16px 16px 48px; scroll-padding-top: 8px; }
+.act-detail > .av-wrap { max-width: 1040px; margin: 0 auto; }
+@container page (min-width: 761px) { .act-detail { padding: 20px 24px 48px; } }
+.act-filters { position: sticky; top: 0; z-index: 1; display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--face); border-bottom: 1px solid var(--rule); }
+.act-filters .search .input { width: 100%; }
+.act-filter-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.act-filter-row .select { flex: 1 1 0; min-width: 0; }
+.act-filter-row .seg { flex: none; }
+.act-filter-row .seg .key { padding: 0 10px; min-width: 0; }
+.act-dates { flex-wrap: wrap; }
+.act-dates .datef { flex: 1 1 120px; }
+.act-skel { display: flex; flex-direction: column; gap: 1px; padding: 8px 10px; }
+.act-skel .skel { height: 52px; }
+.act-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px; font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
+.act-detail .act-empty { align-items: center; padding: 48px 16px; text-align: center; }
+
+.act-list { list-style: none; }
+.act-month { padding: 14px 12px 6px; background: var(--face); border-bottom: 1px solid var(--rule); }
+.act-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 58px; padding: 10px 12px; color: var(--ink);
+  text-decoration: none; border-bottom: 1px solid var(--rule); }
+.act-row:hover { background: var(--face-sunk); }
+.act-row:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.act-row.on { background: var(--face-sunk); box-shadow: inset 2px 0 0 var(--ink); }
+.act-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.act-name { font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.act-date { font-size: 10.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-nums { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; font-size: 11px; text-align: right; color: var(--ink); white-space: nowrap; }
+.act-x { color: var(--ink-2); }
+.act-more { align-self: flex-start; margin-top: 4px; }
+
+/* ---------- The window on a trace (SelectableArea) ---------- */
+.sel-area { position: relative; touch-action: pan-y; }
+.sel-plot { position: absolute; pointer-events: none; }
+.sel-win { position: absolute; top: 0; bottom: 0; background: color-mix(in oklch, var(--signal) 13%, transparent);
+  border-left: 1.5px solid var(--signal); border-right: 1.5px solid var(--signal); }
+.sel-len { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); padding: 1px 5px; border-radius: 2px;
+  background: var(--screen); border: 1px solid var(--signal); color: var(--s-ink); font-size: 10px; white-space: nowrap; }
+.sel-edge { position: absolute; top: 0; bottom: 0; width: 44px; padding: 0; background: none; border: 0; pointer-events: auto; cursor: ew-resize;
+  touch-action: none; display: flex; align-items: center; justify-content: center; }
+.sel-edge.e0 { left: -22px; }
+.sel-edge.e1 { right: -22px; }
+.sel-edge i { width: 8px; height: 28px; border-radius: 2px; background: var(--screen); border: 1.5px solid var(--signal); }
+.sel-edge:hover i, .sel-edge:active i { background: var(--signal); }
+.sel-edge:focus-visible { outline: none; }
+.sel-edge:focus-visible i { outline: 2px solid var(--ink); outline-offset: 2px; background: var(--signal); }
+@container av (max-width: 640px) { .sel-edge { width: 48px; } .sel-edge.e0 { left: -24px; } .sel-edge.e1 { right: -24px; } }
+
+@container page (max-width: 760px) {
+  .act-body { grid-template-columns: minmax(0, 1fr); }
+  .act-listpane { border-right: 0; }
+  .act-detail { padding: 16px 16px calc(96px + env(safe-area-inset-bottom)); }
+  /* The shell pins the strip over the scroller and reserves only its height: keep a real gap. */
+  .shell-m .act-pane.act-detail { padding-top: calc(var(--top-h, 0px) + 16px); }
+  .act-filters .select, .act-filters .seg .key, .act-filters .input, .act-filters .datef-k { height: 44px; }
+  .act-row { min-height: 64px; }
+  .act-row { grid-template-columns: 36px minmax(0, 1fr); row-gap: 4px; padding: 10px 12px; }
+  .act-nums { grid-column: 2; flex-direction: row; justify-content: flex-start; gap: 12px; }
+  .act-more { height: 44px; }
+  .av-type, .av-type-f { width: 100%; }
+  .av-type-f .select, .av-type-o .key { height: 44px; }
+  .av-type-f .select { flex: 1; }
+}
+
+/* A 5- or 6-item key is two balanced rows of three; phones keep two columns. */
+@container av (min-width: 560px) { .av .legend { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
