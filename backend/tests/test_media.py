@@ -356,3 +356,18 @@ def test_the_worker_memory_limit_is_read_in_the_parent_not_in_the_forked_child(e
     monkeypatch.setattr(resource, "setrlimit", lambda which, lim: applied.append((which, lim)))
     hook()
     assert applied == [(resource.RLIMIT_AS, (64 * 1024 * 1024, 64 * 1024 * 1024))]
+
+
+def test_decoding_is_limited_to_the_sniffed_format():
+    """Only the Pillow plugin matching the magic bytes may decode a file."""
+    from media import store
+
+    out = io.BytesIO()
+    Image.new("RGB", (40, 40), "red").save(out, "GIF")
+    with pytest.raises(store.MediaError) as e:
+        store.compress(out.getvalue())
+    assert e.value.code == "unsupported_type"
+    # A camera MPO (JPEG with a multi-picture index) is still a JPEG: first frame only.
+    mpo = io.BytesIO()
+    Image.new("RGB", (40, 40), "red").save(mpo, "MPO", save_all=True, append_images=[Image.new("RGB", (40, 40))])
+    assert store.compress(mpo.getvalue())[1:] == (store.JPEG, 40, 40)

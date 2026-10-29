@@ -61,6 +61,9 @@ PDF, PNG, JPEG, WEBP, HEIC = (
 )
 IMAGES = (PNG, JPEG, WEBP, HEIC)
 HEIF_BRANDS = {b"heic", b"heix", b"heim", b"heis", b"hevc", b"mif1", b"msf1"}
+# Pillow plugin per accepted image type: decoding is limited to the plugin that matches the
+# sniffed magic bytes, so a file can never reach any other (less hardened) Pillow decoder.
+PIL_FORMATS = {PNG: "PNG", JPEG: "JPEG", WEBP: "WEBP", HEIC: "HEIF"}
 
 
 class MediaError(Exception):
@@ -113,19 +116,26 @@ def compress(content: bytes, max_side: int = MAX_SIDE) -> tuple[bytes, str, int,
     from PIL import ImageOps
 
     Image = _pil()
+    fmt = PIL_FORMATS.get(sniff(content))
+    if fmt is None:
+        raise MediaError("unsupported_type", "Choose a PNG, JPEG, WebP or HEIC image.")
     try:
-        img = Image.open(io.BytesIO(content))
+        img = Image.open(io.BytesIO(content), formats=[fmt])
     except Image.DecompressionBombError as e:
         raise MediaError("image_too_large", _too_big()) from e
+    # Pillow's JPEG opener itself labels a JPEG with a multi-picture index "MPO" (camera
+    # stereo/depth photos); only its first frame (a plain JPEG) is ever decoded here.
+    source = "JPEG" if img.format == "MPO" and fmt == "JPEG" else img.format
+    if source != fmt:
+        raise MediaError("unsupported_type", "Choose a PNG, JPEG, WebP or HEIC image.")
     if img.width * img.height > MAX_PIXELS:
         raise MediaError("image_too_large", _too_big())
-    if img.format == "JPEG":  # decode at reduced size (a power-of-two DCT shortcut)
+    if source == "JPEG":  # decode at reduced size (a power-of-two DCT shortcut)
         img.draft("RGB", (max_side * 2, max_side * 2))
     try:
         img.load()
     except Image.DecompressionBombError as e:
         raise MediaError("image_too_large", _too_big()) from e
-    source = img.format
     img = ImageOps.exif_transpose(img)
     img.thumbnail((max_side, max_side), Image.Resampling.LANCZOS)
     out = io.BytesIO()
