@@ -9,7 +9,8 @@ Recordings follow a weekly shape: an inline skate lesson on a 400 m track (Mon),
 (Tue), threshold + gym (Wed), an outdoor inline skate tour or an ice skate on a 400 m oval
 (Thu, alternating weeks), a steady run (Fri), a long run (Sat) and a ride with power (Sun).
 Runs, rides and tours follow synthetic GPS loops with hills; speed reacts to the grade,
-skates and rides carry sprint stretches and stops. The positions are a made-up place.
+skates and rides carry sprint stretches and stops. The positions are a made-up place, except
+the ice session, which sits on the real Jaap Eden oval in Amsterdam.
 
     uv run python -m garmin.demo_export out.zip --days 140 --end 2026-09-28
 """
@@ -28,7 +29,11 @@ from typing import Callable
 
 EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 HOME = (52.0907, 5.1214)  # demo origin
-JAAP_EDEN = (52.3486, 4.9419)  # the outdoor 400 m oval in Amsterdam the athlete skates on
+# The outdoor 400 m oval in Amsterdam the athlete skates on: centre of the ice, compass bearing
+# of the straights (they run NE–SW) and the skated line (110 m straights, 400 m per lap).
+JAAP_EDEN = (52.34794, 4.94460)
+JAAP_EDEN_BEARING = 46.0
+JAAP_EDEN_STRAIGHT = 110.0
 Route = Callable[[float], tuple[float, float, float]]  # distance → (lat, lon, altitude)
 
 
@@ -70,23 +75,31 @@ def loop_route(perimeter_m: float, seed: int, *, origin: tuple[float, float] = H
     return at
 
 
-def oval_route(origin: tuple[float, float] = (52.0849, 5.1590), alt: float = 2.0) -> Route:
-    """A 400 m oval: two 100 m straights and two half circles of radius 100/π m."""
-    r = 100 / math.pi
+def oval_route(origin: tuple[float, float] = (52.0849, 5.1590), alt: float = 2.0, *, straight: float = 100.0,
+               bearing: float = 90.0, wander: float = 0.0) -> Route:
+    """A 400 m oval: two straights of `straight` m and two half circles closing the lap at 400 m,
+    centred on `origin` with the straights along compass `bearing`. `wander` (m) lets the line
+    drift sideways a little, as a skater's line and GPS do, without leaving the lane."""
+    r = (400 - 2 * straight) / (2 * math.pi)
+    h = straight / 2
+    b = math.radians(bearing)
+    along, side = (math.sin(b), math.cos(b)), (-math.cos(b), math.sin(b))  # (east, north)
 
     def at(d: float) -> tuple[float, float, float]:
+        w = wander * (math.sin(2 * math.pi * d / 530) + 0.5 * math.sin(2 * math.pi * d / 170)) / 1.5
         d %= 400
-        if d < 100:
-            x, y = -50 + d, -r
+        if d < straight:
+            x, y = -h + d, -r - w
         elif d < 200:
-            a = -math.pi / 2 + (d - 100) / r
-            x, y = 50 + r * math.cos(a), r * math.sin(a)
-        elif d < 300:
-            x, y = 50 - (d - 200), r
+            a = -math.pi / 2 + (d - straight) / r
+            x, y = h + (r + w) * math.cos(a), (r + w) * math.sin(a)
+        elif d < 200 + straight:
+            x, y = h - (d - 200), r + w
         else:
-            a = math.pi / 2 + (d - 300) / r
-            x, y = -50 + r * math.cos(a), r * math.sin(a)
-        return (*_to_deg(x, y, origin), alt)
+            a = math.pi / 2 + (d - 200 - straight) / r
+            x, y = -h + (r + w) * math.cos(a), (r + w) * math.sin(a)
+        east, north = x * along[0] + y * side[0], x * along[1] + y * side[1]
+        return (*_to_deg(east, north, origin), alt)
     return at
 
 
@@ -258,7 +271,7 @@ def build(days: int = 140, end: date | None = None, seed: int = 7, with_fit: boo
               "steady": loop_route(8200, 3), "track": loop_route(1000, 4, hills=((1, 500),)),
               "ride": loop_route(52000, 5, hills=((35, 9000), (12, 2600)), base_alt=55.0),
               "tour": loop_route(24000, 6, hills=((4, 4000),)), "oval": oval_route(),
-              "jaap": oval_route(JAAP_EDEN)}
+              "jaap": oval_route(JAAP_EDEN, straight=JAAP_EDEN_STRAIGHT, bearing=JAAP_EDEN_BEARING, wander=1.0)}
     for i in range(days):
         d = start + timedelta(days=i)
         wd = d.weekday()
