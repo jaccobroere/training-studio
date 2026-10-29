@@ -51,16 +51,19 @@ def test_global_weekly_cap_pauses_the_assistant_for_everyone(client, monkeypatch
 
 
 def test_reset_usage_forgets_only_this_weeks_turns_for_that_user(client, capsys):
-    from accounts import admin
+    from accounts import admin, service
     from accounts.models import UsageEvent
-    from models.base import utcnow
 
     me = client.get("/api/auth/me").json()
     _turns(me["id"], 4)
     with db.auth_db().session() as s:
         s.add(
-            UsageEvent(user_id=me["id"], kind="assistant_turn", at=utcnow() - timedelta(days=30))
-        )  # last month
+            UsageEvent(
+                user_id=me["id"],
+                kind="assistant_turn",
+                at=service.week_start_utc() - timedelta(days=30),
+            )
+        )  # last month, relative to the pinned FAKE_TODAY week
         s.commit()
     _turns(me["id"] + 1000, 2)
     assert client.get("/api/auth/me").json()["usage"]["used"] == 4
