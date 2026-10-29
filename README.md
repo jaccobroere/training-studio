@@ -47,14 +47,24 @@ The assistant sits in a dock on every page and knows what you are looking at. It
 
 Some things it's good at:
 
-> "Has my HRV dropped since I added the Thursday skate session? Plot it against my 28-day normal."
+> "Has my HRV dropped in weeks with two skating sessions? Plot it against my 28-day normal."
 >
 > "Build me 8 weeks toward a half marathon on 13 December. Three runs and one gym session a week."
 >
 > "I slept badly and my legs are heavy. What should I drop this week?"
 
-<img src="docs/screenshots/health-pinned.png" alt="A pinned analysis made by the assistant: overnight HRV with its 7-day average and a 28-day normal band, next to resting heart rate">
-<sub>An analysis the assistant ran and pinned. It re-runs on current data whenever you open it.</sub>
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/assistant-analysis.png" alt="The assistant answering whether HRV dropped in weeks with two skating sessions: it ran Python in the sandbox and shows a chart of daily HRV against the 28-day normal, with Pin, Code and Data buttons"></td>
+<td width="50%"><img src="docs/screenshots/assistant-change.png" alt="The assistant cutting Saturday's long run to 16 km and making Friday easy: tool steps, an Applied change card with Undo, and the week view already showing the edited sessions"></td>
+</tr>
+<tr>
+<td><sub><b>Ask a question.</b> It writes and runs the analysis, then shows the chart and the code behind it.</sub></td>
+<td><sub><b>Ask for a change.</b> It reads the week, edits the plan live and gives you an Undo.</sub></td>
+</tr>
+</table>
+
+<sub>A real conversation with the live model, run on the synthetic demo data.</sub>
 
 Every edit the assistant makes is an ordinary change with a diff and an Undo button. It never deletes logged work unless you ask it to.
 
