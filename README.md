@@ -3,11 +3,12 @@
 <h1>Training Studio</h1>
 
 <p><strong>A self-hosted training planner for people who like their data.</strong><br>
-Plan your weeks, sync your Garmin, and let an assistant do the heavy planning in plain, editable workouts.</p>
+Plan your weeks, sync your Garmin, and ask an AI assistant to analyse your data and adjust the plan.</p>
 
 <p>
 <a href="#quick-start">Quick start</a> ·
-<a href="#features">Features</a> ·
+<a href="#talk-to-your-training-data">The assistant</a> ·
+<a href="#laps-that-make-sense-on-the-ice">Skating laps</a> ·
 <a href="docs/self-hosting.md">Self-hosting</a> ·
 <a href="docs/development.md">Development</a>
 </p>
@@ -24,37 +25,70 @@ Plan your weeks, sync your Garmin, and let an assistant do the heavy planning in
 
 ## Why
 
-Most training apps either try to motivate you or lock your data in. I wanted a quiet tool that shows the week at a glance, keeps planned and actual apart, and lets me plan a marathon block by talking it through instead of filling in forms.
+My watch collects years of sleep, HRV, heart rate and training data, and Garmin Connect lets me look at it through a fixed set of charts. I wanted to *ask* it things. Is my HRV lower in weeks with two hard skating sessions? Did my easy pace actually improve this block? What should I drop this week if I slept badly? I wanted an assistant that pulls the data, runs the analysis on the spot, shows me the chart, and then changes my plan if I agree.
 
-Training Studio is built from a few simple pieces: exercises, workouts, repeating series and one Markdown profile about you. Everything is editable by hand. The assistant uses those same pieces, so a 12-week plan it drafts is just 12 weeks of ordinary workouts you can drag, change or delete.
+The second itch was ice skating. A watch treats a session on a 400 m oval like a run: a few auto-laps, an average pace, done. I wanted every lap from the GPS track, split into blocks between rests, with my fastest lap, my stints above race speed and how heart rate moved with it.
 
-## Features
+So I built both, on top of a plain training planner. The planner is a few simple pieces: exercises, workouts, repeating series and one Markdown profile about you. The assistant uses those same pieces, so a 12-week plan it drafts is just 12 weeks of ordinary workouts you can drag, change or delete.
+
+## Talk to your training data
+
+The assistant sits in a dock on every page and knows what you are looking at. It is an agent with tools, not a chatbot with a prompt:
+
+| It can | Using |
+|---|---|
+| Read your plan, history, profile and Garmin data | calendar, activities, daily metrics, inbox and profile tools |
+| Run an analysis on the fly | Python in a sandbox container (no network, no secrets) over your daily metrics, sleep, activities, laps and second-by-second streams |
+| Keep a chart | pin the analysis to Health, where it re-runs on fresh data every time you open it |
+| Change your plan | the same operations the UI uses: small asks apply live with Undo, bigger ones (a whole block, a replan) arrive as a proposal you preview on the calendar |
+| Look things up | web search and fetch, plus a built-in coaching guide on intensity, load, tapering and strength |
+| Read what you send it | image and PDF attachments, like a plan from your coach or a screenshot of a race result |
+
+Some things it's good at:
+
+> "Has my HRV dropped since I added the Thursday skate session? Plot it against my 28-day normal."
+>
+> "Build me 8 weeks toward a half marathon on 13 December. Three runs and one gym session a week."
+>
+> "I slept badly and my legs are heavy. What should I drop this week?"
+
+<img src="docs/screenshots/health-pinned.png" alt="A pinned analysis made by the assistant: overnight HRV with its 7-day average and a 28-day normal band, next to resting heart rate">
+<sub>An analysis the assistant ran and pinned. It re-runs on current data whenever you open it.</sub>
+
+Every edit the assistant makes is an ordinary change with a diff and an Undo button. It never deletes logged work unless you ask it to.
+
+It runs on [Ollama Cloud](https://ollama.com) with one API key for the whole server. What leaves your server: the messages you send, plus the data the assistant reads to answer them. Usage limits per account and per week are set in `.env`. Without a key the rest of the app works as usual.
+
+## Laps that make sense on the ice
+
+Every recording gets a full activity view, computed on the server from the raw GPS and heart rate stream:
+
+- **Laps from GPS**, not from the watch: fixed 400 m laps by default, or a lap gate at the point you pass most often, or 200 m, 1 km, device laps.
+- **Blocks and rests.** A stop of a minute or more splits the session into blocks, and laps restart after each one, so a warm-up never pollutes your lap times.
+- **Stints**: stretches above race speed, with km/h and min/km side by side.
+- **A window you drag** across the trace to measure any stretch. It stays in the URL, so you can send someone the exact 3 minutes you mean.
+- **Bests, splits and the route** on OpenStreetMap.
+
+<img src="docs/screenshots/activity.png" alt="Activity detail of an ice skating session: speed and heart rate trace with rest bands, and the route on the map with a wind rose">
+
+It handles watches that don't record every second, and works the same for runs and rides.
+
+## Everything else
 
 - **Week and multi-week planning.** Days as rows, one tap to mark a session done, drag and multi-select across weeks, weekly totals per sport.
-- **Garmin sync.** Activities, sleep, HRV, resting heart rate and more, pulled on a schedule. Recordings link themselves to the workout they belong to.
-- **Activity detail.** Speed and heart rate traces with a window you drag to measure a stretch, laps (400 m by default for skating), splits, bests and the route.
+- **Garmin sync.** Activities, sleep, HRV, resting heart rate and more, pulled on a schedule. Recordings link themselves to the workout they belong to. You can also upload a Garmin export or FIT files.
 - **Health overview.** Every metric next to your own baseline, with the sample size shown. Missing data stays missing, it is never counted as zero.
-- **An assistant that edits your plan.** It reads your calendar, Garmin data and profile. Small changes apply live with Undo, bigger ones arrive as a proposal you preview on the calendar first.
-- **Analyses that stay current.** Ask a question about your data, the assistant runs Python in a sandbox and you can pin the chart. It re-runs on fresh data when you open it.
 - **Multi-user, private by default.** Invite-only accounts, each with its own SQLite database. Full export and restore.
 - **Works on your phone.** Planning happens at a laptop, logging happens right after a session. Both are covered.
 
 <table>
 <tr>
 <td width="50%"><img src="docs/screenshots/weeks.png" alt="Multi-week planner from October to December with per-week totals and done and skipped sessions"></td>
-<td width="50%"><img src="docs/screenshots/activity.png" alt="Activity detail of an ice skating session with the speed and heart rate trace, rest bands and the route map"></td>
+<td width="50%"><img src="docs/screenshots/health.png" alt="Health overview with HRV, resting heart rate, sleep and other metrics compared to a personal baseline, and a sleep chart"></td>
 </tr>
 <tr>
 <td><sub><b>Weeks.</b> The whole block at once, with totals per sport.</sub></td>
-<td><sub><b>Activities.</b> Trace, laps, splits and route for every recording.</sub></td>
-</tr>
-<tr>
-<td><img src="docs/screenshots/health.png" alt="Health overview with HRV, resting heart rate, sleep and other metrics compared to a personal baseline, and a sleep chart"></td>
-<td><img src="docs/screenshots/health-pinned.png" alt="A pinned analysis comparing overnight HRV with its 28-day normal band"></td>
-</tr>
-<tr>
 <td><sub><b>Health.</b> Each number next to your own normal.</sub></td>
-<td><sub><b>Pinned analyses.</b> Made by the assistant, re-run when you open them.</sub></td>
 </tr>
 </table>
 
@@ -127,14 +161,6 @@ Upgrading is `git pull && docker compose up -d --build`. Database migrations run
 
 The full guide is in [docs/self-hosting.md](docs/self-hosting.md).
 </details>
-
-## The assistant
-
-The assistant runs on [Ollama Cloud](https://ollama.com) with one API key for the whole server. Without a key the rest of the app works as usual and the assistant tells you it isn't set up.
-
-It's there for the planning that would be tedious by hand: "build me 8 weeks toward a half marathon", "I'm sick this week, move things around", "has my HRV dropped since I added the extra skate session?". It takes image and PDF attachments, can search the web, and runs analyses in a separate sandbox container with no network and no secrets.
-
-What leaves your server: the messages you send, plus the data the assistant reads to answer them. Usage limits per account and per week are set in `.env`.
 
 ## How it's built
 
